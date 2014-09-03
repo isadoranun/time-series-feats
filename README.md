@@ -1,4 +1,4 @@
-time-series-feats
-=================
+FeatureSelection
+================
 
-Features for time series in astronomy
+Feature selection Library
