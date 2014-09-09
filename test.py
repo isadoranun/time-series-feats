@@ -5,9 +5,16 @@ import numpy as np
 
 
 
-data = np.random.randint(0,10000, 100000000)
-a = FeatureSpace(category='all', automean=[0,0])
-print a.featureList
+data = np.random.uniform(-5,-3, 1000)
+second_data = np.random.uniform(-5,-3, 1000)
+error= np.random.uniform(0.000001,1, 1000)
+mjd= np.random.uniform(40000,50000, 1000)
+
+
+a = FeatureSpace(category='all',featureList=None, automean=[0,0], StetsonL=second_data ,  B_R=second_data, Beyond1Std=error, StetsonJ=second_data, MaxSlope=mjd)
+# a = FeatureSpace(category='basic', automean=[0,0])
+#print a.featureList
 a=a.calculateFeature(data)
-print a.result(method='')
+#print a.result(method='')
+#print a.isa
 print a.result(method='dict')
