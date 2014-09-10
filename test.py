@@ -18,3 +18,4 @@ a=a.calculateFeature(data)
 #print a.result(method='')
 
 print a.result(method='dict')
+print data

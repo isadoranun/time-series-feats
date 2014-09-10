@@ -444,3 +444,24 @@ class FluxPercentileRatioMid80(Base):
         F_mid80=F_10_90 / F_5_95
 
         return F_mid80
+
+class PercentDifferenceFluxPercentile(Base):
+
+    def __init__(self):
+        self.category='basic'
+
+    def fit(self,data):
+        Flux=10**(-0.4*data)
+        median_flux=np.median(Flux)
+
+        sorted_data=np.sort(data)
+        lc_length=len(sorted_data)
+        F_5_index=int(0.05 * lc_length)
+        F_95_index=int(0.95 * lc_length)
+        F_5_95= 10.0**(-0.4 * sorted_data[F_95_index])-10.0**(-0.4 * sorted_data[F_5_index])
+
+        percent_difference=F_5_95/median_flux
+
+        return percent_difference
+
+        
