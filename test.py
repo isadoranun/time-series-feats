@@ -16,5 +16,5 @@ a = FeatureSpace(category='all',featureList=None, automean=[0,0], StetsonL=secon
 #print a.featureList
 a=a.calculateFeature(data)
 #print a.result(method='')
-#print a.isa
+
 print a.result(method='dict')

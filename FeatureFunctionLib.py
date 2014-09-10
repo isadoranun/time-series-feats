@@ -6,6 +6,7 @@ from scipy import stats
 from Base import Base
 
 class Rcs(Base):
+    #Range of cumulative sum
     def __init__(self):
         self.category='timeSeries'
     def fit(self, data):
@@ -16,7 +17,7 @@ class Rcs(Base):
         R = np.max(s) - np.min(s)
         return R
    
-class StestonK(Base):
+class StetsonK(Base):
     def __init__(self):
         self.category='timeSeries'
     def fit(self, data):
@@ -43,6 +44,7 @@ class automean(Base):
         return np.mean(data)+self.length+self.length2
 
 class meanvariance(Base):
+    # variability index
     def __init__(self): 
         self.category='basic'
       
@@ -113,6 +115,8 @@ class Con(Base):
 
 
 class VariabilityIndex(Base):
+
+    # Eta
     '''
     The index is the ratio of mean of the square of successive difference to the variance of data points
     '''
@@ -340,3 +344,103 @@ class PairSlopeTrend(Base):
                 dec += 1
 
         return (inc - dec) / 30
+
+class FluxPercentileRatioMid20(Base):
+
+    def __init__(self):
+        self.category='basic'
+
+    def fit(self,data):
+        sorted_data=np.sort(data)
+        lc_length=len(sorted_data)
+
+        F_60_index=int(0.60 * lc_length)
+        F_40_index=int(0.40 * lc_length)
+        F_5_index=int(0.05 * lc_length)
+        F_95_index=int(0.95 * lc_length)
+        
+        F_40_60= 10.0**(-0.4 * sorted_data[F_60_index])-10.0**(-0.4 * sorted_data[F_40_index])
+        F_5_95= 10.0**(-0.4 * sorted_data[F_95_index])-10.0**(-0.4 * sorted_data[F_5_index])
+        F_mid20=F_40_60 / F_5_95
+
+        return F_mid20
+
+class FluxPercentileRatioMid35(Base):
+
+    def __init__(self):
+        self.category='basic'
+
+    def fit(self,data):
+        sorted_data=np.sort(data)
+        lc_length=len(sorted_data)
+        
+        F_325_index=int(0.325 * lc_length)
+        F_675_index=int(0.675 * lc_length)
+        F_5_index=int(0.05 * lc_length)
+        F_95_index=int(0.95 * lc_length)
+        
+        F_325_675= 10.0**(-0.4 * sorted_data[F_675_index])-10.0**(-0.4 * sorted_data[F_325_index])
+        F_5_95= 10.0**(-0.4 * sorted_data[F_95_index])-10.0**(-0.4 * sorted_data[F_5_index])
+        F_mid35=F_325_675 / F_5_95
+
+        return F_mid35
+
+class FluxPercentileRatioMid50(Base):
+
+    def __init__(self):
+        self.category='basic'
+
+    def fit(self,data):
+        sorted_data=np.sort(data)
+        lc_length=len(sorted_data)
+        
+        F_25_index=int(0.25 * lc_length)
+        F_75_index=int(0.75 * lc_length)
+        F_5_index=int(0.05 * lc_length)
+        F_95_index=int(0.95 * lc_length)
+        
+        F_25_75= 10.0**(-0.4 * sorted_data[F_75_index])-10.0**(-0.4 * sorted_data[F_25_index])
+        F_5_95= 10.0**(-0.4 * sorted_data[F_95_index])-10.0**(-0.4 * sorted_data[F_5_index])
+        F_mid50=F_25_75 / F_5_95
+
+        return F_mid50
+
+class FluxPercentileRatioMid65(Base):
+
+    def __init__(self):
+        self.category='basic'
+
+    def fit(self,data):
+        sorted_data=np.sort(data)
+        lc_length=len(sorted_data)
+        
+        F_175_index=int(0.175 * lc_length)
+        F_825_index=int(0.825 * lc_length)
+        F_5_index=int(0.05 * lc_length)
+        F_95_index=int(0.95 * lc_length)
+        
+        F_175_825= 10.0**(-0.4 * sorted_data[F_825_index])-10.0**(-0.4 * sorted_data[F_175_index])
+        F_5_95= 10.0**(-0.4 * sorted_data[F_95_index])-10.0**(-0.4 * sorted_data[F_5_index])
+        F_mid65=F_175_825 / F_5_95
+
+        return F_mid65
+
+class FluxPercentileRatioMid80(Base):
+
+    def __init__(self):
+        self.category='basic'
+
+    def fit(self,data):
+        sorted_data=np.sort(data)
+        lc_length=len(sorted_data)
+        
+        F_10_index=int(0.10 * lc_length)
+        F_90_index=int(0.90 * lc_length)
+        F_5_index=int(0.05 * lc_length)
+        F_95_index=int(0.95 * lc_length)
+        
+        F_10_90= 10.0**(-0.4 * sorted_data[F_90_index])-10.0**(-0.4 * sorted_data[F_10_index])
+        F_5_95= 10.0**(-0.4 * sorted_data[F_95_index])-10.0**(-0.4 * sorted_data[F_5_index])
+        F_mid80=F_10_90 / F_5_95
+
+        return F_mid80
