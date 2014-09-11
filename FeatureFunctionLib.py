@@ -479,6 +479,43 @@ class PercentAmplitude(Base):
 
         return percent_amplitude
 
+class LinearTrend(Base):
+
+    def __init__(self, mjd):
+        self.category='timeSeries'
+
+        if mjd is None:
+            print "please provide the measurement times to compute MaxSlope"
+            sys.exit(1)
+        self.mjd = mjd
+
+
+    def fit(self,data):
+
+        regression_slope = stats.linregress(self.mjd, data)[0]
+
+        return regression_slope
+
+class EtaB_R(Base):
+
+    
+    def __init__(self,second_data):
+
+        self.category='timeSeries'
+        if second_data is None:
+            print "please provide another data series to compute StetsonL"
+            sys.exit(1)
+        self.data2 = second_data
+        
+
+    def fit(self, data):
+
+        B_Rdata=data-second_data;
+        N = len(B_Rdata)
+        sigma2 = np.var(B_Rdata)
+        
+        return 1.0/((N-1)*sigma2) * np.sum(np.power(R_Rdata[1:] - R_Rdata[:-1] , 2))
+
 
 
         
