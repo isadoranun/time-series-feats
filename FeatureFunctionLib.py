@@ -80,7 +80,7 @@ class StetsonL(Base):
         J= 1.0/len(sigma_i) * np.sum(np.sign(sigma_i) * np.sqrt(np.abs(sigma_i)))
         K = 1/np.sqrt(N*1.0) * np.sum(np.abs(sigma_i)) / np.sqrt(np.sum(sigma_i**2))
 
-        print J, K
+       
         return J*K/0.798        
 
 class Con(Base):
@@ -359,8 +359,8 @@ class FluxPercentileRatioMid20(Base):
         F_5_index=int(0.05 * lc_length)
         F_95_index=int(0.95 * lc_length)
         
-        F_40_60= 10.0**(-0.4 * sorted_data[F_60_index])-10.0**(-0.4 * sorted_data[F_40_index])
-        F_5_95= 10.0**(-0.4 * sorted_data[F_95_index])-10.0**(-0.4 * sorted_data[F_5_index])
+        F_40_60=  sorted_data[F_60_index]-sorted_data[F_40_index]
+        F_5_95= sorted_data[F_95_index]-sorted_data[F_5_index]
         F_mid20=F_40_60 / F_5_95
 
         return F_mid20
@@ -379,8 +379,8 @@ class FluxPercentileRatioMid35(Base):
         F_5_index=int(0.05 * lc_length)
         F_95_index=int(0.95 * lc_length)
         
-        F_325_675= 10.0**(-0.4 * sorted_data[F_675_index])-10.0**(-0.4 * sorted_data[F_325_index])
-        F_5_95= 10.0**(-0.4 * sorted_data[F_95_index])-10.0**(-0.4 * sorted_data[F_5_index])
+        F_325_675= sorted_data[F_675_index]- sorted_data[F_325_index]
+        F_5_95= sorted_data[F_95_index]-sorted_data[F_5_index]
         F_mid35=F_325_675 / F_5_95
 
         return F_mid35
@@ -419,8 +419,8 @@ class FluxPercentileRatioMid65(Base):
         F_5_index=int(0.05 * lc_length)
         F_95_index=int(0.95 * lc_length)
         
-        F_175_825= 10.0**(-0.4 * sorted_data[F_825_index])-10.0**(-0.4 * sorted_data[F_175_index])
-        F_5_95= 10.0**(-0.4 * sorted_data[F_95_index])-10.0**(-0.4 * sorted_data[F_5_index])
+        F_175_825= sorted_data[F_825_index]- sorted_data[F_175_index]
+        F_5_95=  sorted_data[F_95_index]-sorted_data[F_5_index]
         F_mid65=F_175_825 / F_5_95
 
         return F_mid65
@@ -439,8 +439,8 @@ class FluxPercentileRatioMid80(Base):
         F_5_index=int(0.05 * lc_length)
         F_95_index=int(0.95 * lc_length)
         
-        F_10_90= 10.0**(-0.4 * sorted_data[F_90_index])-10.0**(-0.4 * sorted_data[F_10_index])
-        F_5_95= 10.0**(-0.4 * sorted_data[F_95_index])-10.0**(-0.4 * sorted_data[F_5_index])
+        F_10_90=  sorted_data[F_90_index] - sorted_data[F_10_index]
+        F_5_95= sorted_data[F_95_index]-sorted_data[F_5_index]
         F_mid80=F_10_90 / F_5_95
 
         return F_mid80
@@ -451,17 +451,34 @@ class PercentDifferenceFluxPercentile(Base):
         self.category='basic'
 
     def fit(self,data):
-        Flux=10**(-0.4*data)
-        median_flux=np.median(Flux)
+        
+        median_data=np.median(data)
 
         sorted_data=np.sort(data)
         lc_length=len(sorted_data)
         F_5_index=int(0.05 * lc_length)
         F_95_index=int(0.95 * lc_length)
-        F_5_95= 10.0**(-0.4 * sorted_data[F_95_index])-10.0**(-0.4 * sorted_data[F_5_index])
+        F_5_95= sorted_data[F_95_index]-sorted_data[F_5_index]
 
-        percent_difference=F_5_95/median_flux
+        percent_difference=F_5_95/median_data
 
         return percent_difference
+
+class PercentAmplitude(Base):
+
+    def __init__(self):
+        self.category='basic'
+
+    def fit(self,data):
+        
+        median_data=np.median(data)
+        distance_median=np.abs(data-median_data)
+        max_distance=np.max(distance_median)
+
+        percent_amplitude=max_distance / median_data
+
+        return percent_amplitude
+
+
 
         
