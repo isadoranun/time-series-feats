@@ -496,7 +496,7 @@ class LinearTrend(Base):
 
         return regression_slope
 
-class EtaB_R(Base):
+class Eta_B_R(Base):
 
     
     def __init__(self,second_data):
@@ -510,11 +510,86 @@ class EtaB_R(Base):
 
     def fit(self, data):
 
-        B_Rdata=data-second_data;
+        B_Rdata=data-self.data2;
         N = len(B_Rdata)
         sigma2 = np.var(B_Rdata)
         
-        return 1.0/((N-1)*sigma2) * np.sum(np.power(R_Rdata[1:] - R_Rdata[:-1] , 2))
+        return 1.0/((N-1)*sigma2) * np.sum(np.power(B_Rdata[1:] - B_Rdata[:-1] , 2))
+
+
+class Eta_e(Base):
+
+    def __init__(self,mjd):
+
+        self.category='timeSeries'
+
+        if mjd is None:
+            print "please provide the measurement times to compute MaxSlope"
+            sys.exit(1)
+        self.mjd = mjd
+
+    def fit(self,data):
+
+        w = 1.0 / np.power(self.mjd[1:]-self.mjd[:-1] ,2)
+        w_mean = np.mean(w)
+
+        N = len(self.mjd)
+        sigma2=np.var(data)
+
+        eta_e = w_mean * np.power(self.mjd[N-1]-self.mjd[0],2) * np.sum(w * np.power(data[1:]-data[:-1],2)) / (sigma2 * np.sum(w))
+
+        return eta_e
+       
+
+class Bmean(Base):
+
+    def __init__(self):
+
+        self.category='basic'
+
+    def fit(self,data):
+
+        B_mean = np.mean(data)
+
+        return B_mean
+
+
+
+class Q31(Base):
+
+    def __init__(self):
+
+        self.category='basic'
+
+    def fit(self,data):
+
+        return np.percentile(data,75) - np.percentile(data,25)
+
+class Q31B_R(Base):
+
+    def __init__(self,second_data):
+
+        self.category='basic'
+        if second_data is None:
+            print "please provide another data series to compute StetsonJ"
+            sys.exit(1)
+        self.data2 = second_data
+
+    def fit(self,data):
+
+        b_r = data - self.data2
+
+        return np.percentile(b_r,75) - np.percentile(b_r,25)
+
+class AndersonDarling(Base):
+
+    def __init__(self):
+
+        self.category='timeSeries'
+
+    def fit(self,data):
+
+        return stats.anderson(data)[0]
 
 
 
