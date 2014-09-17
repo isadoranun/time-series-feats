@@ -2,8 +2,18 @@ import os,sys,time
 import numpy as np
 import pandas as pd
 from scipy import stats
+# import ctypes
+# import glob
 
 from Base import Base
+
+import lomb
+
+# import astroML as astro
+
+
+# vartools = ctypes.CDLL('/Users/isadoranun/Desktop/Features/time-series-feats/scratch/vartools.so')
+
 
 class Rcs(Base):
     #Range of cumulative sum
@@ -70,12 +80,15 @@ class StetsonL(Base):
 
     def fit(self, data):
         if len(data) != len(self.data2) :
-            print " the lengh of 2 data series are not the same"
-            sys.exit(1)
+            # print " the lengh of 2 data series are not the same"
+            N = np.minimum(len(data),len(self.data2))
+        else :
+            N = len(data)            
+        
+            #sys.exit(1)
 
-        N = len(data)
-        sigmap = np.sqrt(N*1.0/(N-1)) * (data-np.mean(data))/np.std(data)
-        sigmaq = np.sqrt(N*1.0/(N-1)) * (self.data2-np.mean(self.data2))/np.std(self.data2)
+        sigmap = np.sqrt(N*1.0/(N-1)) * (data[:N]-np.mean(data))/np.std(data)
+        sigmaq = np.sqrt(N*1.0/(N-1)) * (self.data2[:N]-np.mean(self.data2))/np.std(self.data2)
         sigma_i = sigmap * sigmaq
         J= 1.0/len(sigma_i) * np.sum(np.sign(sigma_i) * np.sqrt(np.abs(sigma_i)))
         K = 1/np.sqrt(N*1.0) * np.sum(np.abs(sigma_i)) / np.sqrt(np.sum(sigma_i**2))
@@ -248,13 +261,14 @@ class StetsonJ(Base):
 
     def fit(self, data):
         if len(data) != len(self.data2) :
-            print " the lengh of 2 data series are not the same"
-            sys.exit(1)
-        
-        N = len(data)
+            # print " the lengh of 2 data series are not the same"
+            # sys.exit(1)
+            N = np.minimum(len(data),len(self.data2))
+        else:
+            N = len(data)
 
-        sigmap = np.sqrt(N*1.0/(N-1)) * (data-np.mean(data))/np.std(data)
-        sigmaq = np.sqrt(N*1.0/(N-1)) * (self.data2-np.mean(self.data2))/np.std(self.data2)
+        sigmap = np.sqrt(N*1.0/(N-1)) * (data[:N]-np.mean(data))/np.std(data)
+        sigmaq = np.sqrt(N*1.0/(N-1)) * (self.data2[:N]-np.mean(self.data2))/np.std(self.data2)
         
         sigma_i = sigmap * sigmaq
         
@@ -485,7 +499,7 @@ class LinearTrend(Base):
         self.category='timeSeries'
 
         if mjd is None:
-            print "please provide the measurement times to compute MaxSlope"
+            print "please provide the measurement times to compute LinearTrend"
             sys.exit(1)
         self.mjd = mjd
 
@@ -503,15 +517,17 @@ class Eta_B_R(Base):
 
         self.category='timeSeries'
         if second_data is None:
-            print "please provide another data series to compute StetsonL"
+            print "please provide another data series to compute Eta_B_R"
             sys.exit(1)
         self.data2 = second_data
         
 
     def fit(self, data):
 
-        B_Rdata=data-self.data2;
-        N = len(B_Rdata)
+
+        N = np.minimum(len(data),len(self.data2))
+        B_Rdata=data[:N]-self.data2[:N];
+        # N = len(B_Rdata)
         sigma2 = np.var(B_Rdata)
         
         return 1.0/((N-1)*sigma2) * np.sum(np.power(B_Rdata[1:] - B_Rdata[:-1] , 2))
@@ -524,7 +540,7 @@ class Eta_e(Base):
         self.category='timeSeries'
 
         if mjd is None:
-            print "please provide the measurement times to compute MaxSlope"
+            print "please provide the measurement times to compute Eta_e"
             sys.exit(1)
         self.mjd = mjd
 
@@ -571,13 +587,14 @@ class Q31B_R(Base):
 
         self.category='basic'
         if second_data is None:
-            print "please provide another data series to compute StetsonJ"
+            print "please provide another data series to compute Q31B_R"
             sys.exit(1)
         self.data2 = second_data
 
     def fit(self,data):
 
-        b_r = data - self.data2
+        N = np.minimum(len(data),len(self.data2))
+        b_r=data[:N]-self.data2[:N];
 
         return np.percentile(b_r,75) - np.percentile(b_r,25)
 
@@ -592,5 +609,112 @@ class AndersonDarling(Base):
         return stats.anderson(data)[0]
 
 
+# class PeriodLS(Base):
 
+#     def __init__(self,mjd,error, minper, maxper, subsample, \
+#     Npeaks, clip, clipiter, whiten):
+#         '''
+#         Lomb Scargle period search algorithm.
         
+#         Return [periods, probs = log10 of false alarm probability, SNRs].
+#             for probs : see Hartman et al. 2008, ApJ, 675, 1254
+            
+#         Note that mjd, mag and err should be numpy array types.
+        
+        
+#         mjd : MJD list
+        
+#         mag : magnitude list
+        
+#         err : photometric uncertainty list
+        
+#         minper : minimum period to search
+        
+#         maxper : maximum period to search
+        
+#         subsample : number of subsampling
+        
+#         Npeaks : number of peaks which will be returned
+        
+#         clip : sigma clipping threshold
+        
+#         clipiter : iteration of clipping or not. 1 is iteration. 0 is not.
+        
+#         whiten : whitening each period and find next period. SNR also will
+#             be calculated based on the whitened data.
+#         '''
+        
+#         #set argument types and return type of the Lombscargle function in vartools.
+#         #It is said that this process can speed up the ctypes processes.
+#         '''
+#         --Function definition of Lombscargle in Joel's VARTOOLS--
+#         void Lombscargle (int N,
+#             double *t, double *mag,
+#             double *sig, double minper, double maxper,
+#             double subsample, int Npeaks, double *periods,
+#             double *probs, double *SNR,
+#             int outputflag, char *outfile, int ascii, int whiten,
+#             double clip, int clipiter, int fixperiodSNR, double fixperiodSNR_period,
+#             double *fixperiodSNR_peakvalues, double *fixperiodSNR_SNRvalues)
+#         '''
+
+#         self.mjd = mdj
+#         self.error=error
+#         self.minper=minper
+#         self.maxper = maxper
+#         self.subsample= subsample 
+#         self.Npeaks=Npeaks
+#         self.clip= clip
+#         self.clipiter= clipiter
+#         self.whiten= whiten 
+
+#     def fit(self,data):
+        
+#         vartools.Lombscargle.argtypes = [ctypes.c_int, \
+#             ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), \
+#             ctypes.POINTER(ctypes.c_double), ctypes.c_double, ctypes.c_double, \
+#             ctypes.c_double, ctypes.c_int, ctypes.POINTER(ctypes.c_double), \
+#             ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), \
+#             ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, \
+#             ctypes.c_double, ctypes.c_int, ctypes.c_int, ctypes.c_double, \
+#             ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double)]
+#         vartools.Lombscargle.restype = None
+        
+#         periods = np.ones([self.Npeaks])
+#         probs = np.ones([self.Npeaks])
+#         SNRs = np.ones([self.Npeaks])
+        
+#         vartools.Lombscargle(len(self.mjd), \
+#         self.mjd.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), \
+#         data.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), \
+#         self.error.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), \
+#         self.minper, self.maxper, self.subsample, self.Npeaks, \
+#         periods.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), \
+#         probs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), \
+#         SNRs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), \
+#         0, '', 1, 0, self.clip, self.clipiter, 0, self.whiten, \
+#         np.ones(0).ctypes.data_as(ctypes.POINTER(ctypes.c_double)), \
+#         np.ones(0).ctypes.data_as(ctypes.POINTER(ctypes.c_double)))
+        
+#         #return [periods, probs, SNRs]
+#         return periods
+
+
+class PeriodLS(Base):
+
+    def __init__(self,mjd):
+
+        self.category='timeSeries'
+
+        if mjd is None:
+            print "please provide the measurement times to compute PeriodLS"
+            sys.exit(1)
+        self.mjd = mjd
+
+    def fit(self,data):
+
+        fx,fy, nout, jmax, prob = lomb.fasper(self.mjd,data, 6., 6.)
+
+        return 2 * np.pi / jmax 
+ 
+            

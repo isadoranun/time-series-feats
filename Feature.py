@@ -94,6 +94,8 @@ class FeatureSpace:
             return np.asarray(self.__result)
         elif method == 'dict':
             return dict(zip(self.featureList,self.__result))
+        elif method == 'features':
+            return self.featureList
         else:
             return self.__result
 
