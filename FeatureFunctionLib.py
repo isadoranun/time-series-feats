@@ -609,96 +609,6 @@ class AndersonDarling(Base):
         return stats.anderson(data)[0]
 
 
-# class PeriodLS(Base):
-
-#     def __init__(self,mjd,error, minper, maxper, subsample, \
-#     Npeaks, clip, clipiter, whiten):
-#         '''
-#         Lomb Scargle period search algorithm.
-        
-#         Return [periods, probs = log10 of false alarm probability, SNRs].
-#             for probs : see Hartman et al. 2008, ApJ, 675, 1254
-            
-#         Note that mjd, mag and err should be numpy array types.
-        
-        
-#         mjd : MJD list
-        
-#         mag : magnitude list
-        
-#         err : photometric uncertainty list
-        
-#         minper : minimum period to search
-        
-#         maxper : maximum period to search
-        
-#         subsample : number of subsampling
-        
-#         Npeaks : number of peaks which will be returned
-        
-#         clip : sigma clipping threshold
-        
-#         clipiter : iteration of clipping or not. 1 is iteration. 0 is not.
-        
-#         whiten : whitening each period and find next period. SNR also will
-#             be calculated based on the whitened data.
-#         '''
-        
-#         #set argument types and return type of the Lombscargle function in vartools.
-#         #It is said that this process can speed up the ctypes processes.
-#         '''
-#         --Function definition of Lombscargle in Joel's VARTOOLS--
-#         void Lombscargle (int N,
-#             double *t, double *mag,
-#             double *sig, double minper, double maxper,
-#             double subsample, int Npeaks, double *periods,
-#             double *probs, double *SNR,
-#             int outputflag, char *outfile, int ascii, int whiten,
-#             double clip, int clipiter, int fixperiodSNR, double fixperiodSNR_period,
-#             double *fixperiodSNR_peakvalues, double *fixperiodSNR_SNRvalues)
-#         '''
-
-#         self.mjd = mdj
-#         self.error=error
-#         self.minper=minper
-#         self.maxper = maxper
-#         self.subsample= subsample 
-#         self.Npeaks=Npeaks
-#         self.clip= clip
-#         self.clipiter= clipiter
-#         self.whiten= whiten 
-
-#     def fit(self,data):
-        
-#         vartools.Lombscargle.argtypes = [ctypes.c_int, \
-#             ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), \
-#             ctypes.POINTER(ctypes.c_double), ctypes.c_double, ctypes.c_double, \
-#             ctypes.c_double, ctypes.c_int, ctypes.POINTER(ctypes.c_double), \
-#             ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double), \
-#             ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_int, \
-#             ctypes.c_double, ctypes.c_int, ctypes.c_int, ctypes.c_double, \
-#             ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double)]
-#         vartools.Lombscargle.restype = None
-        
-#         periods = np.ones([self.Npeaks])
-#         probs = np.ones([self.Npeaks])
-#         SNRs = np.ones([self.Npeaks])
-        
-#         vartools.Lombscargle(len(self.mjd), \
-#         self.mjd.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), \
-#         data.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), \
-#         self.error.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), \
-#         self.minper, self.maxper, self.subsample, self.Npeaks, \
-#         periods.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), \
-#         probs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), \
-#         SNRs.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), \
-#         0, '', 1, 0, self.clip, self.clipiter, 0, self.whiten, \
-#         np.ones(0).ctypes.data_as(ctypes.POINTER(ctypes.c_double)), \
-#         np.ones(0).ctypes.data_as(ctypes.POINTER(ctypes.c_double)))
-        
-#         #return [periods, probs, SNRs]
-#         return periods
-
 
 class PeriodLS(Base):
 
@@ -713,8 +623,8 @@ class PeriodLS(Base):
 
     def fit(self,data):
 
-        fx,fy, nout, jmax, prob = lomb.fasper(self.mjd,data, 6., 6.)
+        fx,fy, nout, jmax, prob = lomb.fasper(self.mjd,data, 6., 100.)
 
-        return 2 * np.pi / jmax 
+        return 1.0 / fx[jmax] 
  
             
