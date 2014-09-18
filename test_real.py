@@ -14,7 +14,7 @@ a=a.calculateFeature(data)
 
 print a.result(method='dict')
 
-# nombres = a.result(method='features')
-# guardar = np.vstack((nombres,a.result(method='array')))
-# # a=np.vstack((previous_data,a))
-# np.savetxt('test_real.csv', guardar, delimiter="," ,fmt="%s")
+nombres = a.result(method='features')
+guardar = np.vstack((nombres,a.result(method='array')))
+# a=np.vstack((previous_data,a))
+np.savetxt('test_real.csv', guardar, delimiter="," ,fmt="%s")

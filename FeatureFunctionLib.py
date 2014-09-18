@@ -2,17 +2,12 @@ import os,sys,time
 import numpy as np
 import pandas as pd
 from scipy import stats
-# import ctypes
-# import glob
+
 
 from Base import Base
 
 import lomb
 
-# import astroML as astro
-
-
-# vartools = ctypes.CDLL('/Users/isadoranun/Desktop/Features/time-series-feats/scratch/vartools.so')
 
 
 class Rcs(Base):
@@ -151,7 +146,7 @@ class B_R(Base):
     mean(B1) - mean(B2)
     '''
     def __init__(self, second_data):
-        self.category='basic'
+        self.category='timeSeries'
         if second_data is None:
             print "please provide another data series to compute B_R"
             sys.exit(1)
