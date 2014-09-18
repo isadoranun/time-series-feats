@@ -18,3 +18,5 @@ nombres = a.result(method='features')
 guardar = np.vstack((nombres,a.result(method='array')))
 # a=np.vstack((previous_data,a))
 np.savetxt('test_real.csv', guardar, delimiter="," ,fmt="%s")
+
+#B_R = second_data, Eta_B_R = second_data, Eta_e = mjd, MaxSlope = mjd, PeriodLS = mjd, Q31B_R = second_data, StetsonJ = second_data, StetsonL = second_data)

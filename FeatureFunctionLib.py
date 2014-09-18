@@ -580,7 +580,7 @@ class Q31B_R(Base):
 
     def __init__(self,second_data):
 
-        self.category='basic'
+        self.category='timeSeries'
         if second_data is None:
             print "please provide another data series to compute Q31B_R"
             sys.exit(1)
