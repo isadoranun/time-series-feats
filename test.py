@@ -19,10 +19,10 @@ mjd= np.random.uniform(40000,50000, 1000)
 
 
 
-a = FeatureSpace(category='all',featureList=None, automean=[0,0], StetsonL=second_data ,  B_R=second_data, Beyond1Std=error, StetsonJ=second_data, MaxSlope=mjd, LinearTrend=mjd, Eta_B_R=second_data, Eta_e=mjd, Q31B_R=second_data, PeriodLS=mjd)
+# a = FeatureSpace(category='all',featureList=None, automean=[0,0], StetsonL=second_data ,  B_R=second_data, Beyond1Std=error, StetsonJ=second_data, MaxSlope=mjd, LinearTrend=mjd, Eta_B_R=second_data, Eta_e=mjd, Q31B_R=second_data, PeriodLS=mjd)
 
 # PeriodLS=[mjd,error,minper, maxper, subsample, Npeaks, clip, clipiter, whiten]
-# a = FeatureSpace(category='basic', automean=[0,0])
+a = FeatureSpace(category='basic', automean=[0,0])
 #print a.featureList
 a=a.calculateFeature(data)
 #print a.result(method='')
