@@ -62,8 +62,20 @@ class meanvariance(Base):
 class autocor(Base):
     def __init__(self, lag=1):
         self.category='timeSeries'
+        self.lag = lag
     def fit(self, data):
-        return np.correlate(data, data)[0]
+        N=len(data)
+        std= np.std(data)
+        m = np.mean(data)
+        suma = 0
+
+        for i in xrange(N-self.lag):
+            suma += (data[i]- m)*(data[i+self.lag] - m)
+
+        ac = 1/((N-self.lag)* std**2) * suma 
+
+        return ac
+        #return np.correlate(data, data)[0]
 
 class StetsonL(Base):
     def __init__(self, second_data):
@@ -289,7 +301,7 @@ class MaxSlope(Base):
         index = self.mjd
 
         for i in xrange(len(data) - 1):
-            slope = float(data[i+1] - data[i]) / (index[i+1] - index[i])
+            slope = float(np.abs(data[i+1] - data[i]) / (index[i+1] - index[i]))
 
             if slope > max_slope:
                 max_slope = slope
@@ -547,7 +559,13 @@ class Eta_e(Base):
         N = len(self.mjd)
         sigma2=np.var(data)
 
-        eta_e = w_mean * np.power(self.mjd[N-1]-self.mjd[0],2) * np.sum(w * np.power(data[1:]-data[:-1],2)) / (sigma2 * np.sum(w))
+        suma = 0
+        suma2 = 0
+        for i in xrange(N-1):
+            suma += w[i]*(data[i+1]-data[i])**2
+            suma2 += w[i]
+
+        eta_e = w_mean * np.power(self.mjd[N-1]-self.mjd[0],2) * suma / (sigma2 * suma2 * N**2)
 
         return eta_e
        
@@ -600,6 +618,7 @@ class AndersonDarling(Base):
         self.category='timeSeries'
 
     def fit(self,data):
+
 
         return stats.anderson(data)[0]
 
