@@ -3,8 +3,9 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 
-
 from Base import Base
+
+from scipy.optimize import minimize
 
 import lomb
 
@@ -420,8 +421,8 @@ class FluxPercentileRatioMid50(Base):
         F_5_index=int(0.05 * lc_length)
         F_95_index=int(0.95 * lc_length)
         
-        F_25_75= 10.0**(-0.4 * sorted_data[F_75_index])-10.0**(-0.4 * sorted_data[F_25_index])
-        F_5_95= 10.0**(-0.4 * sorted_data[F_95_index])-10.0**(-0.4 * sorted_data[F_5_index])
+        F_25_75= sorted_data[F_75_index]- sorted_data[F_25_index]
+        F_5_95= sorted_data[F_95_index]-sorted_data[F_5_index]
         F_mid50=F_25_75 / F_5_95
 
         return F_mid50
@@ -640,5 +641,90 @@ class PeriodLS(Base):
         fx,fy, nout, jmax, prob = lomb.fasper(self.mjd,data, 6., 100.)
 
         return 1.0 / fx[jmax] 
- 
-            
+
+
+class CAR_sigma(Base):
+   
+
+    def __init__(self, entry):
+
+        self.category='timeSeries'
+
+        self.N = len(entry[0])
+        self.error= entry[1].reshape((self.N,1))
+        self.mjd = entry[0].reshape((self.N,1))
+          
+
+    def CAR_Lik(self, parameters,t,x,error_vars):
+
+        sigma = parameters[0]
+        tau = parameters[1]
+       #b = parameters[1] #comment it to do 2 pars estimation
+       #tau = params(1,1);
+       #sigma = sqrt(2*var(x)/tau);
+
+        b = np.mean(x)/tau
+        epsilon = 1e-300
+        cte_neg = -np.infty
+        num_datos = np.size(x)
+
+        Omega = []
+        x_hat = []
+        a = []
+        x_ast = []
+
+        Omega.append((tau*(sigma**2))/2.)
+        x_hat.append(0.)
+        a.append(0.)
+        x_ast.append(x[0] - b*tau)
+
+        loglik = 0.
+
+        for i in range(1,num_datos):
+
+            a_new = np.exp(-(t[i]-t[i-1])/tau)
+            x_ast.append(x[i] - b*tau)
+            x_hat.append(a_new*x_hat[i-1] + (a_new*Omega[i-1]/(Omega[i-1] + error_vars[i-1]))*(x_ast[i-1]-x_hat[i-1]))
+            Omega.append(Omega[0]*(1-(a_new**2)) + ((a_new**2))*Omega[i-1]*( 1 - (Omega[i-1]/(Omega[i-1]+ error_vars[i-1]))))
+
+            loglik_inter = np.log( ((2*np.pi*(Omega[i] + error_vars[i]))**-0.5) * (np.exp( -0.5 * ( ((x_hat[i]-x_ast[i])**2) / (Omega[i] + error_vars[i]))) + epsilon))
+            loglik = loglik + loglik_inter
+
+            if(loglik <= cte_neg):
+                print('CAR lik se fue a inf')
+                return None
+
+        return -loglik #the minus one is to perfor maximization using the minimize function
+
+    def calculateCAR(self, LC):
+        x0 = [10, 1]
+        bnds = ((0, 100), (0, 100))
+        res = minimize(self.CAR_Lik, x0, args=(LC[:,0],LC[:,1],LC[:,2]) ,method='nelder-mead',bounds = bnds)
+        sigma = res.x[0]
+        CAR_sigma.tau = res.x[1]
+        return sigma
+
+    def getAttr(self):
+        return  CAR_sigma.tau   
+
+    def fit(self, data):
+
+        LC = np.hstack((self.mjd, data.reshape((self.N,1)), self.error))
+        a = self.calculateCAR(LC)
+
+        return a
+
+
+
+class CAR_tau(CAR_sigma):
+   
+
+    def __init__(self):
+
+        self.category='timeSeries'
+
+
+    def fit(self, data):
+
+        a = CAR_tau()
+        return a.getAttr()
