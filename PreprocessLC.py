@@ -2,7 +2,7 @@ import numpy as np
 
 class Preprocess_LC:
 
-	def __init__(self, mjd, data, error):
+	def __init__(self, data, mjd, error):
 
 		self.N = len(mjd)
 		self.m = np.mean(error)
@@ -12,16 +12,21 @@ class Preprocess_LC:
 
 	def Preprocess(self):
 
-	t_out = []
-	data_out = []
-	error_out = []	
+		mjd_out = []
+		data_out = []
+		error_out = []	
 
-		for i in xrange(N):
-			if self.error[i] < (3 * self.m) & (np.absolute(self.data[i] - np.mean(data)) / np.std(x)) < 5 :
-				t_out.append(self.t[i])
-				data_out.append(self.data[i])
-				error_out.append(self.error[i])
+		for i in xrange(len(self.data)):
+					
+					if self.error[i] < (3 * self.m) and (np.absolute(self.data[i] - np.mean(self.data)) / np.std(self.data)) < 5 :
+						
+						mjd_out.append(self.mjd[i])
+						data_out.append(self.data[i])
+						error_out.append(self.error[i])
 
 
+		data_out = np.asarray(data_out)	
+		mjd_out = np.asarray(mjd_out)	
+		error_out = np.asarray(error_out)	
 
-	return [data_out, t_out, error_out]
+		return [data_out, mjd_out, error_out]
