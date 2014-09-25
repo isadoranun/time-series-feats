@@ -2,11 +2,14 @@
 from Feature import FeatureSpace
 import numpy as np
 from import_lightcurve import LeerLC_MACHO
+from PreprocessLC import Preprocess_LC
 
 
 #Opening the light curve
 lc = LeerLC_MACHO('1.3444.614')
 [data, mjd, error,second_data] = lc.leerLC()
+preproccesed_data = Preprocess_LC(data, mjd, error)
+[data, mjd, error] = preproccesed_data.Preprocess()
  
 
 #Calculating the features

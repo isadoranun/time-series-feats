@@ -577,6 +577,7 @@ class Bmean(Base):
 
         self.category='basic'
 
+
     def fit(self,data):
 
         B_mean = np.mean(data)
@@ -649,11 +650,10 @@ class CAR_sigma(Base):
     def __init__(self, entry):
 
         self.category='timeSeries'
-
         self.N = len(entry[0])
         self.error= entry[1].reshape((self.N,1))
         self.mjd = entry[0].reshape((self.N,1))
-          
+
 
     def CAR_Lik(self, parameters,t,x,error_vars):
 
@@ -704,8 +704,9 @@ class CAR_sigma(Base):
         CAR_sigma.tau = res.x[1]
         return sigma
 
-    def getAttr(self):
+    def getAtt(self):
         return  CAR_sigma.tau   
+
 
     def fit(self, data):
 
@@ -727,4 +728,16 @@ class CAR_tau(CAR_sigma):
     def fit(self, data):
 
         a = CAR_tau()
-        return a.getAttr()
+        return a.getAtt()
+
+
+class CAR_tmean(CAR_sigma):
+    
+    def __init__(self):
+
+        self.category='timeSeries'
+    
+    def fit(self, data):
+
+        a = CAR_tmean()
+        return np.mean(data) / a.getAtt()
