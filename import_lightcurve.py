@@ -12,7 +12,7 @@ class LeerLC_MACHO:
     def leerLC(self):
 
         # Opening the blue band
-        fid = open('lc_'+self.id+'.mjd','r')
+        fid = open(self.id,'r')
 
         saltos_linea = 3
         delimiter = ' '
