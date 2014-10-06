@@ -6,38 +6,47 @@ from PreprocessLC import Preprocess_LC
 import os.path
 
 count = 0
+folder = 1
 
-for i in os.listdir(os.getcwd()):
-# for i in os.listdir('/Users/isadoranun/Desktop/Features/time-series-feats/'):
-    if i.endswith("B.mjd"): 
+path = '/Users/isadoranun/Dropbox/lightcurves/'
 
-        count = count + 1
+for j in os.listdir(path):
+    
+    if os.path.isdir(path + j):
 
-        lc_B = LeerLC_MACHO(i)
-        lc_R = LeerLC_MACHO(i[:-5] + 'R.mjd')
+        for i in os.listdir(path + j):
 
-#Opening the light curve
+            if i.endswith("B.mjd"): 
 
-        [data, mjd, error] = lc_B.leerLC()
-        [data2, mjd2, error2] = lc_R.leerLC()
+                count = count + 1
 
-        preproccesed_data = Preprocess_LC(data, mjd, error)
-        [data, mjd, error] = preproccesed_data.Preprocess()
+                lc_B = LeerLC_MACHO(path + j +'/'+ i[2:])
+                lc_R = LeerLC_MACHO(path + j +'/'+ i[2:-5] + 'R.mjd')
 
-        preproccesed_data = Preprocess_LC(data2, mjd2, error2)
-        [second_data, mjd2, error2] = preproccesed_data.Preprocess()
+        #Opening the light curve
 
-        a = FeatureSpace(category='all',featureList=None, automean=[0,0], StetsonL=second_data ,  B_R=second_data, Beyond1Std=error, StetsonJ=second_data, MaxSlope=mjd, LinearTrend=mjd, Eta_B_R=second_data, Eta_e=mjd, Q31B_R=second_data, PeriodLS=mjd, CAR_sigma=[mjd, error])
-        a=a.calculateFeature(data)
+                [data, mjd, error] = lc_B.leerLC()
+                [data2, mjd2, error2] = lc_R.leerLC()
 
-        if count == 1:
-        	nombres = a.result(method='features')
-        	guardar = np.vstack((nombres, a.result(method='array')))
-        	np.savetxt('test_real.csv', guardar, delimiter="," ,fmt="%s")
+                preproccesed_data = Preprocess_LC(data, mjd, error)
+                [data, mjd, error] = preproccesed_data.Preprocess()
 
-        else:
-        	my_data = np.genfromtxt('test_real.csv', delimiter=',')
-        	guardar = np.vstack((nombres,my_data[1:], a.result(method='array')))
-        	np.savetxt('test_real.csv', guardar, delimiter="," ,fmt="%s")
+                preproccesed_data = Preprocess_LC(data2, mjd2, error2)
+                [second_data, mjd2, error2] = preproccesed_data.Preprocess()
 
-#B_R = second_data, Eta_B_R = second_data, Eta_e = mjd, MaxSlope = mjd, PeriodLS = mjd, Q31B_R = second_data, StetsonJ = second_data, StetsonL = second_data)
+                a = FeatureSpace(category='all',featureList=None, automean=[0,0], StetsonL=second_data ,  B_R=second_data, Beyond1Std=error, StetsonJ=second_data, MaxSlope=mjd, LinearTrend=mjd, Eta_B_R=second_data, Eta_e=mjd, Q31B_R=second_data, PeriodLS=mjd, CAR_sigma=[mjd, error], SlottedA = mjd)
+                a=a.calculateFeature(data)
+
+                if count == 1:
+                	nombres = np.hstack(("MACHO_Id" , a.result(method='features') , "Class"))
+                	guardar = np.vstack((nombres, np.hstack((i[5:-6] , a.result(method='array') , folder ))))
+                	np.savetxt('test_real.csv', guardar, delimiter="," ,fmt="%s")
+
+                else:
+                	my_data = np.genfromtxt('test_real.csv', delimiter=',', dtype=None)
+                	guardar = np.vstack((nombres,my_data[1:], np.hstack((i[5:-6] , a.result(method='array') , folder ))))
+                	np.savetxt('test_real.csv', guardar, delimiter="," ,fmt="%s")
+
+        folder = folder + 1            
+
+        #B_R = second_data, Eta_B_R = second_data, Eta_e = mjd, MaxSlope = mjd, PeriodLS = mjd, Q31B_R = second_data, StetsonJ = second_data, StetsonL = second_data)

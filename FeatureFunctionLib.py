@@ -61,22 +61,35 @@ class meanvariance(Base):
 
     
 class autocor(Base):
-    def __init__(self, lag=1):
+    def __init__(self):
         self.category='timeSeries'
-        self.lag = lag
-    def fit(self, data):
+
+    def autocorrelation(self, data, lag):
         N=len(data)
         std= np.std(data)
         m = np.mean(data)
         suma = 0
 
-        for i in xrange(N-self.lag):
-            suma += (data[i]- m)*(data[i+self.lag] - m)
+        for i in xrange(N-lag):
+            suma += (data[i]- m)*(data[i+lag] - m)
 
-        ac = 1/((N-self.lag)* std**2) * suma 
+        ac = 1/((N-lag)* std**2) * suma 
 
         return ac
-        #return np.correlate(data, data)[0]
+        
+    def fit(self, data):
+        threshold = math.exp(-1)
+        norm_value = self.autocorrelation(data, lag =0 )
+        lag = 1
+        current_autocorr_value = 1
+
+        while current_autocorr_value > threshold:
+            current_autocorr_value = self.autocorrelation(data, lag=lag)/norm_value
+            lag = lag + 1
+        return lag
+
+   
+
 
 class StetsonL(Base):
     def __init__(self, second_data):
