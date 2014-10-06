@@ -47,6 +47,8 @@ for j in os.listdir(path):
                 	guardar = np.vstack((nombres,my_data[1:], np.hstack((i[5:-6] , a.result(method='array') , folder ))))
                 	np.savetxt('test_real.csv', guardar, delimiter="," ,fmt="%s")
 
+              
+
         folder = folder + 1            
 
         #B_R = second_data, Eta_B_R = second_data, Eta_e = mjd, MaxSlope = mjd, PeriodLS = mjd, Q31B_R = second_data, StetsonJ = second_data, StetsonL = second_data)

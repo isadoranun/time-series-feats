@@ -15,6 +15,7 @@ class Rcs(Base):
     #Range of cumulative sum
     def __init__(self):
         self.category='timeSeries'
+
     def fit(self, data):
         sigma = np.std(data)
         N = len(data)
@@ -79,7 +80,7 @@ class autocor(Base):
         
     def fit(self, data):
         threshold = math.exp(-1)
-        norm_value = self.autocorrelation(data, lag =0 )
+        norm_value = self.autocorrelation(data, lag = 0 )
         lag = 1
         current_autocorr_value = 1
 
@@ -88,7 +89,38 @@ class autocor(Base):
             lag = lag + 1
         return lag
 
-   
+
+class StetsonK_AC(Base):
+    def __init__(self):
+
+        self.category='timeSeries'
+
+    def autocorrelation(self, data, lag):
+        N=len(data)
+        std= np.std(data)
+        m = np.mean(data)
+        suma = 0
+
+        for i in xrange(N-lag):
+            suma += (data[i]- m)*(data[i+lag] - m)
+
+        ac = 1/((N-lag)* std**2) * suma 
+
+        return ac
+
+    def fit(self, data):
+        autocor_vector=[]
+
+        for i in xrange(len(data)/2):
+            autocor_vector.append(self.autocorrelation(data, i))
+
+        N_autocor = len(autocor_vector)
+        sigmap = np.sqrt(N_autocor*1.0/(N_autocor-1)) * (data-np.mean(autocor_vector))/np.std(autocor_vector)
+    
+        K = 1/np.sqrt(N_autocor*1.0) * np.sum(np.abs(sigmap)) / np.sqrt(np.sum(sigmap**2))
+
+        return K
+
 
 
 class StetsonL(Base):
@@ -653,8 +685,24 @@ class PeriodLS(Base):
     def fit(self,data):
 
         fx,fy, nout, jmax, prob = lomb.fasper(self.mjd,data, 6., 100.)
+        PeriodLS.prob = prob
 
         return 1.0 / fx[jmax] 
+
+    def getPeriod_fit(self):
+
+        return PeriodLS.prob
+
+
+class Period_fit(PeriodLS):
+
+    def __init__(self):
+        self.category='timeSeries'
+
+    def fit(self, data):
+
+        a = Period_fit()
+        return a.getPeriod_fit()
 
 
 class CAR_sigma(Base):
@@ -725,6 +773,7 @@ class CAR_sigma(Base):
     def fit(self, data):
         LC = np.hstack((self.mjd , data.reshape((self.N,1)), self.error))
         a = self.calculateCAR(LC)
+
         return a
 
 
@@ -740,19 +789,24 @@ class CAR_tau(CAR_sigma):
     def fit(self, data):
 
         a = CAR_tau()
+
         return a.getAtt()
 
 
-class CAR_tmean(CAR_sigma):
+# class CAR_tmean(CAR_sigma):
     
-    def __init__(self):
+#     def __init__(self):
 
-        self.category='timeSeries'
+#         self.category='timeSeries'
     
-    def fit(self, data):
+#     def fit(self, data):
 
-        a = CAR_tmean()
-        return np.mean(data) / a.getAtt()
+#         a = CAR_tmean()
+#         #return np.mean(data) / a.getAtt()
+#         b = np.mean(data) / a.getAtt()
+#         return b
+
+
 
 
 class SlottedA(Base):
@@ -776,19 +830,21 @@ class SlottedA(Base):
         lc.index = map(lambda x: x - min(lc.index), lc.index)
 
         # subtract mean from mag values
-        lc['mag'] = lc['mag'].subtract(lc['mag'].mean())
+        lc2 = lc.copy()
 
-        min_time = min(lc.index)
-        max_time = max(lc.index)
-        current_time = lc.index[0]
+        lc2['mag'] = lc2['mag'].subtract(lc2['mag'].mean())
+
+        min_time = min(lc2.index)
+        max_time = max(lc2.index)
+        current_time = lc2.index[0]
         lag_time = current_time + k * T
 
         N = 0
         product_sum = 0
         while lag_time < max_time - T/2.0:
             # get all the points in the two bins (current_time bin and lag_time bin)
-            lc_points = lc[np.logical_and(lc.index >= current_time - T/2.0, lc.index <= current_time + T/2.0)]
-            lc_points_lag = lc[np.logical_and(lc.index >= lag_time - T/2.0, lc.index <= lag_time + T/2.0)]
+            lc_points = lc2[np.logical_and(lc2.index >= current_time - T/2.0, lc2.index <= current_time + T/2.0)]
+            lc_points_lag = lc2[np.logical_and(lc2.index >= lag_time - T/2.0, lc2.index <= lag_time + T/2.0)]
 
             current_time = current_time + T
             lag_time = lag_time + T
@@ -808,11 +864,12 @@ class SlottedA(Base):
 
     def fit(self, data):
 
-        lc = pd.DataFrame(data, index = self.mjd, columns = ['mag'])
 
+        lc = pd.DataFrame(data, index = self.mjd, columns = ['mag'])
 
         threshold = math.exp(-1)
         norm_value = self.slotted_autocorrelation(lc, k=0, T=4)
+
         T = 4
         k = 1
         current_autocorr_value = 1
@@ -820,6 +877,7 @@ class SlottedA(Base):
         while current_autocorr_value > threshold:
             current_autocorr_value = self.slotted_autocorrelation(lc, k=k, T=T)/norm_value
             k = k + 1
+
         return k*T
 
    
