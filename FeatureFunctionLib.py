@@ -793,20 +793,17 @@ class CAR_tau(CAR_sigma):
         return a.getAtt()
 
 
-# class CAR_tmean(CAR_sigma):
+class CAR_tmean(CAR_sigma):
     
-#     def __init__(self):
+    def __init__(self):
 
-#         self.category='timeSeries'
+        self.category='timeSeries'
     
-#     def fit(self, data):
+    def fit(self, data):
 
-#         a = CAR_tmean()
-#         #return np.mean(data) / a.getAtt()
-#         b = np.mean(data) / a.getAtt()
-#         return b
-
-
+        a = CAR_tmean()
+        #return np.mean(data) / a.getAtt()
+        return np.mean(data) / a.getAtt()
 
 
 class SlottedA(Base):

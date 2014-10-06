@@ -16,7 +16,7 @@ for j in os.listdir(path):
 
         for i in os.listdir(path + j):
 
-            if i.endswith("B.mjd"): 
+            if i.endswith("B.mjd") and os.path.isfile(path + j +'/'+ i[2:-5] + 'R.mjd'):
 
                 count = count + 1
 
@@ -47,7 +47,7 @@ for j in os.listdir(path):
                 	guardar = np.vstack((nombres,my_data[1:], np.hstack((i[5:-6] , a.result(method='array') , folder ))))
                 	np.savetxt('test_real.csv', guardar, delimiter="," ,fmt="%s")
 
-              
+
 
         folder = folder + 1            
 
