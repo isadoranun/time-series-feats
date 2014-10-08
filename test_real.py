@@ -19,8 +19,7 @@ preproccesed_data = Preprocess_LC(data2, mjd2, error2)
 [second_data, mjd2, error2] = preproccesed_data.Preprocess()
  
 #Calculating the features
-a = FeatureSpace(category='all',featureList=None, automean=[0,0], StetsonL=second_data ,  B_R=second_data, Beyond1Std=error, StetsonJ=second_data, MaxSlope=mjd, LinearTrend=mjd, Eta_B_R=second_data, Eta_e=mjd, Q31B_R=second_data, PeriodLS=mjd)
-#, CAR_sigma=[mjd, error], SlottedA = mjd)
+a = FeatureSpace(category='all',featureList=None, automean=[0,0], StetsonL=second_data ,  B_R=second_data, Beyond1Std=error, StetsonJ=second_data, MaxSlope=mjd, LinearTrend=mjd, Eta_B_R=second_data, Eta_e=mjd, Q31B_R=second_data, PeriodLS=mjd, CAR_sigma=[mjd, error], SlottedA = mjd)
 a=a.calculateFeature(data)
 
 print a.result(method='dict')

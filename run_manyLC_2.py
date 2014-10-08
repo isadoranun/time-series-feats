@@ -6,12 +6,12 @@ from PreprocessLC import Preprocess_LC
 import os.path
 
 count = 4
-folder = 5
+folder = 6
 guardar = np.zeros(shape=(1,42))
 
 path = '/Users/isadoranun/Dropbox/lightcurves/'
 
-for j in os.listdir(path)[7:]:
+for j in os.listdir(path)[8:9]:
     
     if os.path.isdir(path + j):
 
