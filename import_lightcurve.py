@@ -1,5 +1,5 @@
 
-from Feature import FeatureSpace
+#from Feature import FeatureSpace
 import numpy as np
 
 class LeerLC_MACHO:

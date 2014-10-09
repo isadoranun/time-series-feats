@@ -124,23 +124,21 @@ class StetsonK_AC(Base):
 
 
 class StetsonL(Base):
-    def __init__(self, second_data):
+    def __init__(self, entry):
         self.category='timeSeries'
-        if second_data is None:
-            print "please provide another data series to compute StetsonL"
-            sys.exit(1)
-        self.data2 = second_data
+        # if second_data is None:
+        #     print "please provide another data series to compute StetsonL"
+        #     sys.exit(1)
+        self.data2 = entry[0]
+        self.aligned_data = entry[1]
 
     def fit(self, data):
-        if len(data) != len(self.data2) :
-            # print " the lengh of 2 data series are not the same"
-            N = np.minimum(len(data),len(self.data2))
-        else :
-            N = len(data)            
+        
+        N = len(self.aligned_data)            
         
             #sys.exit(1)
 
-        sigmap = np.sqrt(N*1.0/(N-1)) * (data[:N]-np.mean(data))/np.std(data)
+        sigmap = np.sqrt(N*1.0/(N-1)) * (self.aligned_data[:N]-np.mean(self.aligned_data))/np.std(self.aligned_data)
         sigmaq = np.sqrt(N*1.0/(N-1)) * (self.data2[:N]-np.mean(self.data2))/np.std(self.data2)
         sigma_i = sigmap * sigmaq
         J= 1.0/len(sigma_i) * np.sum(np.sign(sigma_i) * np.sqrt(np.abs(sigma_i)))
@@ -305,22 +303,19 @@ class StetsonJ(Base):
     '''
     Stetson (1996) variability index, a robust standard deviation
     '''
-    def __init__(self, second_data):
+    def __init__(self, entry):
         self.category='timeSeries'
-        if second_data is None:
-            print "please provide another data series to compute StetsonJ"
-            sys.exit(1)
-        self.data2 = second_data
+        # if second_data is None:
+        #     print "please provide another data series to compute StetsonJ"
+        #     sys.exit(1)
+        self.data2 = entry[0]
+        self.aligned_data = entry[1]
 
     def fit(self, data):
-        if len(data) != len(self.data2) :
-            # print " the lengh of 2 data series are not the same"
-            # sys.exit(1)
-            N = np.minimum(len(data),len(self.data2))
-        else:
-            N = len(data)
+        
+        N = len(self.data2)
 
-        sigmap = np.sqrt(N*1.0/(N-1)) * (data[:N]-np.mean(data))/np.std(data)
+        sigmap = np.sqrt(N*1.0/(N-1)) * (self.aligned_data[:N]-np.mean(self.aligned_data))/np.std(self.aligned_data)
         sigmaq = np.sqrt(N*1.0/(N-1)) * (self.data2[:N]-np.mean(self.data2))/np.std(self.data2)
         
         sigma_i = sigmap * sigmaq
@@ -566,20 +561,21 @@ class LinearTrend(Base):
 class Eta_B_R(Base):
 
     
-    def __init__(self,second_data):
+    def __init__(self,entry):
 
         self.category='timeSeries'
-        if second_data is None:
-            print "please provide another data series to compute Eta_B_R"
-            sys.exit(1)
-        self.data2 = second_data
+        # if second_data is None:
+        #     print "please provide another data series to compute Eta_B_R"
+        #     sys.exit(1)
+        self.data2 = entry[0]
+        self.aligned_data = entry[1]
         
 
     def fit(self, data):
 
 
-        N = np.minimum(len(data),len(self.data2))
-        B_Rdata=data[:N]-self.data2[:N];
+        N = len(self.aligned_data)
+        B_Rdata=self.aligned_data-self.data2;
         # N = len(B_Rdata)
         sigma2 = np.var(B_Rdata)
         
@@ -643,18 +639,19 @@ class Q31(Base):
 
 class Q31B_R(Base):
 
-    def __init__(self,second_data):
+    def __init__(self,entry):
 
         self.category='timeSeries'
-        if second_data is None:
-            print "please provide another data series to compute Q31B_R"
-            sys.exit(1)
-        self.data2 = second_data
+        # if second_data is None:
+        #     print "please provide another data series to compute Q31B_R"
+        #     sys.exit(1)
+        self.data2 = entry[0]
+        self.aligned_data = entry[1]
 
     def fit(self,data):
 
-        N = np.minimum(len(data),len(self.data2))
-        b_r=data[:N]-self.data2[:N];
+        N = len(self.data2)
+        b_r=self.aligned_data[:N]-self.data2[:N];
 
         return np.percentile(b_r,75) - np.percentile(b_r,25)
 
@@ -804,6 +801,7 @@ class CAR_tmean(CAR_sigma):
         a = CAR_tmean()
         #return np.mean(data) / a.getAtt()
         return np.mean(data) / a.getAtt()
+
 
 
 class SlottedA(Base):
