@@ -29,6 +29,7 @@ div #notebook { /* centre the content */
     padding-left: 1em;
 }
 
+
 #notebook li { /* More space between bullet points */
 margin-top:0.8em;
 }
@@ -57,55 +58,63 @@ div.text_cell_render{
 
 /* Formatting for header cells */
 .text_cell_render h1 {
-    font-family: 'Philosopher', sans-serif;
+    font-family: 'Alvo', sans-serif;
     font-weight: 400;
     font-size: 40pt;
     line-height: 100%;
-    color: rgb(12,85,97);
+    color: black;
     margin-bottom: 0.1em;
     margin-top: 0.1em;
     text-align: center;
     display: block;
+    background-color:  #ADD8E6; 
+    border-radius: 10px; /* rounded borders */
+    padding: 1em;
+    margin-top: 1em;
 }
 
 .text_cell_render h2 {
-    font-family: 'Philosopher', serif;
+    font-family: 'Alvo', sans-serif;
     font-weight: 700;
     font-size: 24pt;
     line-height: 100%;
-    color: rgb(171,165,131);
+    color: black;
     margin-bottom: 0.1em;
     margin-top: 0.1em;
     display: block;
+    background-color:   #ACC4E6; 
+    border-radius: 10px; /* rounded borders */
+    padding: 1em;
+    margin-top: 1em;
 }    
 
 .text_cell_render h3 {
-    font-family: 'Philosopher', serif;
+    font-family: 'Alvo', sans-serif;
     margin-top:12px;
     margin-bottom: 3px;
-    font-style: italic;
-    color: rgb(95,92,72);
-}
-
-.text_cell_render h4 {
-    font-family: 'Philosopher', serif;
-    font-weight: 800;
-    font-size: 15pt;   
-    margin-top:12px;
-    margin-bottom: 3px;
-    font-style: italic;
+    /*font-style: italic;*/
     color: #E56717;
 }
 
+.text_cell_render h4 {
+    font-family: 'Alvo', sans-serif;
+    font-weight: 800;
+    font-size: 13pt;   
+    margin-top:12px;
+    margin-bottom: 3px;
+    color:#FF9949;
+}
+
 .text_cell_render h5 {
-    font-family: 'Alegreya Sans', sans-serif;
-    font-weight: 500;
-    font-size: 14pt;
-    color: #1796E6;
-    font-style: italic;
-    margin-bottom: .1em;
-    margin-top: 0.4em;
-    display: block;
+    font-family: 'Alvo', sans-serif;
+    font-weight: 800;
+    font-size: 12pt;   
+    margin-top:12px;
+    margin-bottom: 3px;
+    color:  #6495ED;
+    font-style: normal;
+
+    
 }
 
 .text_cell_render h6 {
