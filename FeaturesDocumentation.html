@@ -8,6 +8,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
 <style type="text/css">
     .clearfix{*zoom:1}.clearfix:before,.clearfix:after{display:table;content:"";line-height:0}
 .clearfix:after{clear:both}
@@ -2038,10 +2042,8 @@ table_of_contents();
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<center>
-<p><strong>Authors:</strong> Isadora Nun, Pavlos Protopapas</p>
-<strong>Contributors:</strong> Karim Pichara, Daniel Acuña, Nicolás Castro, Cristobal Mackenzie, Andrés Riveros and Ming Zhu
-<center>
+<p><center><strong>Authors:</strong> Isadora Nun, Pavlos Protopapas</p>
+<p><strong>Contributors:</strong> Karim Pichara, Daniel Acuña, Nicolás Castro, Cristobal Mackenzie, Andrés Riveros and Ming Zhu<center></p>
 </div>
 </div>
 </div>
@@ -2167,9 +2169,10 @@ In&nbsp;[10]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>The library is coded in python and can be downloaded for free from the github website https://github.com/isadoranun/time-series-feats.git It is composed by two main parts. The first one, Feature.py, is a wrapper class that allows the user to select the category of the features to be calculated or to specify a list of them. The second one, FeatureFunciontLib.py, contains the available features. Each one of them is comprise of a class with at least two functions:</p>
-<p>init: receives the necessary parameters for the feature calculation (ex: observational error)</p>
-<p>fit : returns the calculated value</p>
+<p>The library is coded in python and can be downloaded for free from the github website <a href="https://github.com/isadoranun/time-series-feats.git">https://github.com/isadoranun/time-series-feats.git</a>
+It receives as a minimum input the magnitude of the light-curve and it is composed by two main parts. The first one, Feature.py, is a wrapper class that allows the user to select the category of the features to be calculated or to specify a list of them. The second one, FeatureFunciontLib.py, contains the available features. Each one of them is contained on a class with at least two functions:</p>
+<p>init: receives the necessary inputs (different from the magnitude) for the feature calculation (ex: observational error, observational time, magnitude in a different color band, etc.) </p>
+<p>fit : returns the calculated feature. The output can only be one value.</p>
 </div>
 </div>
 </div>
@@ -2188,7 +2191,13 @@ In&nbsp;[10]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>In order to analize a light curve, it is first necessary to open the file that contains it. This file should be an array composed by at least four vectors: magnitude in two different bands, time of measurement and the associated observational error. For example, the function LeerLC_MACHO() receives a MACHO id as an input and returns the following output: - data: magnitude measurement (blue band) - mjd: time of measurement (blue band) - error: associated observational error (blue band) - second_data: magnitude measurement (red band)</p>
+<p>In order to analize a light curve, it is first necessary to open the file that contains it. This file should be an array composed by at least four vectors: magnitude in two different bands, time of measurement and the associated observational error. For example, the function LeerLC_MACHO() receives a MACHO id as an input and returns the following output:</p>
+<ul>
+<li>data: magnitude measurement (blue band)</li>
+<li>mjd: time of measurement (blue band)</li>
+<li>error: associated observational error (blue band)</li>
+<li>second_data: magnitude measurement (red band)</li>
+</ul>
 <p>A demostration of how to import a MACHO light curve is presented below:</p>
 </div>
 </div>
@@ -2253,7 +2262,7 @@ In&nbsp;[12]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>For a visual representation of the light curve, we can plot the data as follows:</p>
+<p>For a visual representation of the light curve, we can plot the data as follows: </p>
 </div>
 </div>
 </div>
@@ -2880,8 +2889,11 @@ TkSuQmCC
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Note: for periodic light curves we are able to transform the photometric time series into a single light-curve in which each period is mapped onto the same time axis as follows: <span class="math">\[ t&#39;=\{\frac{t-t_0}{T}\} \]</span></p>
-<p>where <span class="math">\(T\)</span> is the period, <span class="math">\(t_0\)</span> is an arbitrary starting point and the symbol {} represents the non-integer part of the fraction. This process produces a folded light curve on an x-axis of folded time that ranges from 0 to 1. The corresponding folded light curve of the previous example is shown next:</p>
+<p>Note: for periodic light curves we are able to transform the photometric time
+series into a single light-curve in which each period is mapped onto the same time axis as follows:
+$$ t'=\{\frac{t-t_0}{T}\} $$</p>
+<p>where $T$ is the period, $t_0$ is an arbitrary starting point and the symbol {} represents the non-integer part of the fraction. This process produces a folded light curve on an x-axis of
+folded time that ranges from 0 to 1. The corresponding folded light curve of the previous example is shown next:</p>
 </div>
 </div>
 </div>
@@ -3518,9 +3530,9 @@ IiIRp2AvIiIScQr2IiIiEff/AcFtU5U+Kyd5AAAAAElFTkSuQmCC
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>The library we created allows the user to choose the features of interest to be calculated or to calculate them all simultaneously. Also, the features can be calculated based on their category: &quot;basic&quot; or &quot;time series&quot;.</p>
-<p>By default the library receives only the magnitude data as input. Some features need extra data as the times of measurement or the associated error, this must be specified as a parameter of the feature.</p>
-<p>The list of all the possible features with their corresponding categories and parameters is presented in the following table:</p>
+<p>The library we created allows the user to choose the features of interest to be calculated or to calculate them all simultaneously. Also, the features can be calculated based on their category: &quot;basic&quot; or &quot;time series&quot;. </p>
+<p>By default the library receives only the magnitude data as input. Some features need extra data as the times of measurement or the associated error, this must be specified as a parameter of the feature. </p>
+<p>The list of all the possible features with their corresponding categories and parameters is presented in the following table: </p>
 </div>
 </div>
 </div>
@@ -3745,8 +3757,8 @@ In&nbsp;[18]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>The standard deviation <span class="math">\(\sigma\)</span> of the sample is defined as:</p>
-<p><span class="math">\[ \sigma = \sum_{i} \frac{(y_i-\hat{y})^2}{N-1} \]</span></p>
+<p>The standard deviation blah $\sigma$ of the sample is defined as: </p>
+<p>$$\sigma=\sum_{i} \frac{(y_{i}-\hat{y})^2}{N-1}$$</p>
 </div>
 </div>
 </div>
@@ -3788,7 +3800,7 @@ In&nbsp;[15]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>For example, a white noise time serie should have <span class="math">\(\sigma=1\)</span></p>
+<p>For example, a white noise time serie should have $\sigma=1$</p>
 </div>
 </div>
 </div>
@@ -4524,7 +4536,7 @@ DMUZAIDAUJwBAAgMxRkAgMBQnAEACAzFGQCAwPw/l71XcTuxpZ4AAAAASUVORK5CYII=
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Returns the false alarm probability of the largest periodogram value. Let's test it for a normal distributed data and for a periodic one:</p>
+<p> Returns the false alarm probability of the largest periodogram value. Let&#39;s test it for a normal distributed data and for a periodic one: </p>
 </div>
 </div>
 </div>
@@ -4635,11 +4647,12 @@ In&nbsp;[19]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>These three features are based on the Welch/Stetson variability index <span class="math">\(I\)</span> defined by the equation: <span class="math">\[ I = \sqrt{\frac{1}{n(n-1)}} \sum_{i=1}^n {\left( \frac{b_i-\hat{b}}{\sigma_{b,i}}\right) \left( \frac{v_i - \hat{v}}{\sigma_{v,i}} \right)} \]</span></p>
-<p>where <span class="math">\(b_i\)</span> and <span class="math">\(v_i\)</span> are the apparent magnitudes obtained for the candidate star in two observations closely spaced in time on some occasion <span class="math">\(i\)</span>, <span class="math">\(\sigma_{b,i}\)</span> and <span class="math">\(\sigma_{v,i}\)</span> are the standard errors of those magnitudes, <span class="math">\(\hat{b}\)</span> and <span class="math">\(\hat{v}\)</span> are the weighted mean magnitudes in the two filters, and <span class="math">\(n\)</span> is the number of observation pairs.</p>
+<p>These three features are based on the Welch/Stetson variability index $I$ defined by the equation:
+$$ I = \sqrt{\frac{1}{n(n-1)}} \sum_{i=1}^n {\left( \frac{b_i-\hat{b}}{\sigma_{b,i}}\right) \left( \frac{v_i - \hat{v}}{\sigma_{v,i}} \right)} $$</p>
+<p>where $b_i$ and $v_i$ are the apparent magnitudes obtained for the candidate star in two observations closely spaced in time on some occasion $i$, $\sigma_{b,i}$ and $\sigma_{v,i}$ are the standard errors of those magnitudes, $\hat{b}$ and $\hat{v}$ are the weighted mean magnitudes in the two filters, and $n$ is the number of observation pairs.</p>
 <p>Since a given frame pair may include data from two filters which did not have equal numbers of observations overall, the &quot;relative error&quot; is calculated as follows:</p>
-<p><span class="math">\[ \delta = \sqrt{\frac{n}{n-1}} \frac{v-\hat{v}}{\sigma_v} \]</span></p>
-<p>allowing all residuals to be compared on an equal basis.</p>
+<p>$$ \delta = \sqrt{\frac{n}{n-1}} \frac{v-\hat{v}}{\sigma_v} $$</p>
+<p>allowing all residuals to be compared on an equal basis. </p>
 </div>
 </div>
 </div>
@@ -4658,8 +4671,9 @@ In&nbsp;[19]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Stetson K is a robust kurtosis measure: <span class="math">\[ \frac{1/N \sum_{i=1}^N |\delta_i|}{\sqrt{1/N \sum_{i=1}^N \delta_i^2}}\]</span></p>
-<p>where the index <span class="math">\(i\)</span> runs over all <span class="math">\(N\)</span> observations available for the star without regard to pairing. For a Gaussian magnitude distribution K should take a value close to <span class="math">\(\sqrt{2/\pi} = 0.798\)</span>, let's test it:</p>
+<p>Stetson K is a robust kurtosis measure:
+$$ \frac{1/N \sum_{i=1}^N |\delta_i|}{\sqrt{1/N \sum_{i=1}^N \delta_i^2}}$$</p>
+<p>where the index $i$ runs over all $N$ observations available for the star without regard to pairing. For a Gaussian magnitude distribution K should take a value close to $\sqrt{2/\pi} = 0.798$, let&#39;s test it:</p>
 </div>
 </div>
 </div>
@@ -4765,8 +4779,8 @@ In&nbsp;[23]:
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Stetson J is a robust version of the variability index. It is calculated based on two simultaneous light curves of a same star and is defined as:</p>
-<p><span class="math">\[ J =  \sum_{k=1}^n  sgn(P_k) \sqrt{|P_k|}\]</span></p>
-<p>with $P_k = <em>{i_k} </em>{j_k} $</p>
+<p>$$ J =  \sum_{k=1}^n  sgn(P_k) \sqrt{|P_k|}$$</p>
+<p>with $P_k = \delta_{i_k} \delta_{j_k} $</p>
 <p>For a Gaussian magnitude distribution, J should take a value close to zero:</p>
 </div>
 </div>
@@ -4821,7 +4835,8 @@ In&nbsp;[24]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Stetson L variability index describes the synchronous variability of different bands and is defined as: <span class="math">\[ L = \frac{JK}{0.798} \]</span></p>
+<p>Stetson L variability index describes the synchronous variability of different bands and is defined as:
+$$ L = \frac{JK}{0.798} $$</p>
 <p>Again, for a Gaussian magnitude distribution, L should take a value close to zero:</p>
 </div>
 </div>
@@ -4866,7 +4881,7 @@ In&nbsp;[25]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Variability-index-\(\eta\)">Variability index <span class="math">\(\eta\)</span><a class="anchor-link" href="#Variability-index-\(\eta\)">&#182;</a></h4>
+<h4 id="Variability-index-$\eta$">Variability index $\eta$<a class="anchor-link" href="#Variability-index-$\eta$">&#182;</a></h4>
 </div>
 </div>
 </div>
@@ -4876,7 +4891,8 @@ In&nbsp;[25]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Variability index <span class="math">\(\eta\)</span> is the ratio of the mean of the square of successive differences to the variance of data points. The index was originally proposed to check whether the successive data points are independent or not. In other words, the index was developed to check if any trends exist in the data (von Neumann 1941). It is defined as: <span class="math">\[\eta=\frac{1}{\left(N-1 \right)\sigma^2}\sum_{i=1}^{N-1} \left( m_{i+1}-m_i \right)^2 \]</span></p>
+<p>Variability index $\eta$ is the ratio of the mean of the square of successive differences to the variance of data points. The index was originally proposed to check whether the successive data points are independent or not. In other words, the index was developed to check if any trends exist in the data (von Neumann 1941). It is defined as:
+$$\eta=\frac{1}{\left(N-1 \right)\sigma^2}\sum_{i=1}^{N-1} \left( m_{i+1}-m_i \right)^2 $$</p>
 <p>The variability index should take a value close to 2 for a normal distribution:</p>
 </div>
 </div>
@@ -4920,7 +4936,7 @@ In&nbsp;[26]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Variability-index-\(\eta^e\)">Variability index <span class="math">\(\eta^e\)</span><a class="anchor-link" href="#Variability-index-\(\eta^e\)">&#182;</a></h4>
+<h4 id="Variability-index-$\eta^e$">Variability index $\eta^e$<a class="anchor-link" href="#Variability-index-$\eta^e$">&#182;</a></h4>
 </div>
 </div>
 </div>
@@ -4930,9 +4946,9 @@ In&nbsp;[26]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Although <span class="math">\(\eta\)</span> is a poweful index for quantifying variability characteristics of a time series, it does not take into account unequal sampling. Thus <span class="math">\(\eta^e\)</span> is defined as:</p>
-<p><span class="math">\[ \eta^e = \bar{w} \left( t_{N-1} - t_1 \right)^2 \frac{\sum_{i=1}^{N-1} w_i \left(m_{i+1} - m_i \right)^2}{\sigma^2 \sum_{i=1}^{N-1} w_i} \]</span></p>
-<p><span class="math">\[ w_i = \frac{1}{\left( t_{i+1} - t_i \right)^2} \]</span></p>
+<p>Although $\eta$ is a poweful index for quantifying variability characteristics of a time series, it does not take into account unequal sampling. Thus $\eta^e$ is defined as:</p>
+<p>$$ \eta^e = \bar{w} \left( t_{N-1} - t_1 \right)^2 \frac{\sum_{i=1}^{N-1} w_i \left(m_{i+1} - m_i \right)^2}{\sigma^2 \sum_{i=1}^{N-1} w_i} $$</p>
+<p>$$ w_i = \frac{1}{\left( t_{i+1} - t_i \right)^2} $$</p>
 </div>
 </div>
 </div>
@@ -4986,7 +5002,8 @@ In&nbsp;[27]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Small sample kurtosis of the magnitudes: <span class="math">\[ Kurtosis = \frac{N \left( N+1 \right)}{\left( N-1 \right) \left( N-2 \right) \left( N-3 \right)} \sum_{i=1}^N \left( \frac{m_i-\hat{m}}{\sigma} \right)^4 - \frac{3\left( N-1 \right)^2}{\left( N-2 \right) \left( N-3 \right)} \]</span></p>
+<p>Small sample kurtosis of the magnitudes:
+$$ Kurtosis = \frac{N \left( N+1 \right)}{\left( N-1 \right) \left( N-2 \right) \left( N-3 \right)} \sum_{i=1}^N \left( \frac{m_i-\hat{m}}{\sigma} \right)^4 - \frac{3\left( N-1 \right)^2}{\left( N-2 \right) \left( N-3 \right)} $$</p>
 <p>For a normal distribution, the small kurtosis should be zero:</p>
 </div>
 </div>
@@ -5040,7 +5057,8 @@ In&nbsp;[28]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>The skewness of a sample is defined as follow: <span class="math">\[ Skewness = \frac{N}{\left(N-1\right)\left(N-2\right)} \sum_{i=1}^N \left( \frac{m_i-\hat{m}}{\sigma}\right)^3 \]</span></p>
+<p>The skewness of a sample is defined as follow:
+$$ Skewness = \frac{N}{\left(N-1\right)\left(N-2\right)} \sum_{i=1}^N \left( \frac{m_i-\hat{m}}{\sigma}\right)^3 $$</p>
 <p>For a normal distribution it should be equal to zero:</p>
 </div>
 </div>
@@ -5094,7 +5112,9 @@ In&nbsp;[29]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>The median absolute deviation is defined as the median discrepancy of the data from the median data: <span class="math">\[Median Absolute Deviation = median\left( |mag - median(mag)|\right) \]</span> It should take a value close to 0.675 for a normal distribution:</p>
+<p>The median absolute deviation is defined as the median discrepancy of the data from the median data:
+$$Median Absolute Deviation = median\left( |mag - median(mag)|\right) $$
+It should take a value close to 0.675 for a normal distribution:</p>
 </div>
 </div>
 </div>
@@ -5137,7 +5157,7 @@ In&nbsp;[30]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Amplitude-FIX">Amplitude FIX<a class="anchor-link" href="#Amplitude-FIX">&#182;</a></h4>
+<h4 id="Amplitude">Amplitude<a class="anchor-link" href="#Amplitude">&#182;</a></h4>
 </div>
 </div>
 </div>
@@ -5147,14 +5167,15 @@ In&nbsp;[30]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>The amplitude is defined as the half of the difference between the maximum and minimum magnitudes. For a sequence of numbers from 0 to 1000 the amplitude should be equal to 500:</p>
+<p>The amplitude is defined as the half of the difference between the mean of the maximum 5% and the mean of the minimum 5% magnitudes.
+For a sequence of numbers from 0 to 1000 the amplitude should be equal to 475.5:</p>
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">
-In&nbsp;[31]:
+In&nbsp;[21]:
 </div>
 <div class="inner_cell">
     <div class="input_area">
@@ -5175,7 +5196,7 @@ In&nbsp;[31]:
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
-{&apos;Amplitude&apos;: 500}
+{&apos;Amplitude&apos;: 475.5}
 
 </pre>
 </div>
@@ -5200,7 +5221,7 @@ In&nbsp;[31]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Index introduced for the selection of variable stars from the OGLE database (Wozniak 2000). To calculate Con, we count the number of three consecutive data points that are brighter or fainter than <span class="math">\(2\sigma\)</span> and normalize the number by <span class="math">\(N-2\)</span>.</p>
+<p>Index introduced for the selection of variable stars from the OGLE database (Wozniak 2000). To calculate Con, we count the number of three consecutive data points that are brighter or fainter than $2\sigma$ and normalize the number by $N-2$. </p>
 <p>For a normal distribution and by considering just one star, Con should take values close to 0.045:</p>
 </div>
 </div>
@@ -5254,7 +5275,7 @@ In&nbsp;[32]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>The Anderson-Darling test is a statistical test of whether a given sample of data is drawn from a given probability distribution. When applied to testing if a normal distribution adequately describes a set of data, it is one of the most poweful statistical tools for detecting most departures from normality.</p>
+<p>The Anderson-Darling test is a statistical test of whether a given sample of data is drawn from a given probability distribution. When applied to testing  if a normal distribution adequately describes a set of data, it is one of the most poweful statistical tools for detecting most departures from normality.</p>
 <p>For a normal distribution the Anderson-Darling statistic should take values close to 0.25:</p>
 </div>
 </div>
@@ -5452,7 +5473,7 @@ In&nbsp;[34]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Slope of a linear fit to the light-curve.</p>
+<p>Slope of a linear fit to the light-curve. </p>
 </div>
 </div>
 </div>
@@ -5615,11 +5636,18 @@ In&nbsp;[37]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>In order to caracterize the sorted magnitudes distribution we use percentiles. If <span class="math">\(F_{5,95}\)</span> is the difference between <span class="math">\(95\%\)</span> and <span class="math">\(5\%\)</span> magnitude values, we calculate the following: - flux_percentile_ratio_mid20: ratio <span class="math">\(F_{40,60}/F_{5,95}\)</span> - flux_percentile_ratio_mid35: ratio <span class="math">\(F_{32.5,67.5}/F_{5,95}\)</span> - flux_percentile_ratio_mid50: ratio <span class="math">\(F_{25,75}/F_{5,95}\)</span> - flux_percentile_ratio_mid65: ratio <span class="math">\(F_{17.5,82.5}/F_{5,95}\)</span> - flux_percentile_ratio_mid80: ratio <span class="math">\(F_{10,90}/F_{5,95}\)</span></p>
-<p>For the first feature for example, in the case of a normal distribution, this is equivalente to calculate <span class="math">\(\frac{erf^{-1}(2 \cdot 0.6-1)-erf^{-1}(2 \cdot 0.4-1)}{erf^{-1}(2 \cdot 0.95-1)-erf^{-1}(2 \cdot 0.05-1)}\)</span>. So, the expected values for each of the flux percentile features are:</p>
+<p>In order to caracterize the sorted magnitudes distribution we use percentiles. If $F_{5,95}$ is the difference between $95\%$ and $5\%$ magnitude values, we calculate the following:</p>
+<ul>
+<li>flux_percentile_ratio_mid20: ratio $F_{40,60}/F_{5,95}$ </li>
+<li>flux_percentile_ratio_mid35: ratio $F_{32.5,67.5}/F_{5,95}$ </li>
+<li>flux_percentile_ratio_mid50: ratio $F_{25,75}/F_{5,95}$</li>
+<li>flux_percentile_ratio_mid65: ratio $F_{17.5,82.5}/F_{5,95}$ </li>
+<li>flux_percentile_ratio_mid80: ratio $F_{10,90}/F_{5,95}$</li>
+</ul>
+<p>For the first feature for example, in the case of a normal distribution, this is equivalente to calculate $\frac{erf^{-1}(2 \cdot 0.6-1)-erf^{-1}(2 \cdot 0.4-1)}{erf^{-1}(2 \cdot 0.95-1)-erf^{-1}(2 \cdot 0.05-1)}$. So, the expected values for each of the flux percentile features are:</p>
 <ul>
 <li>flux_percentile_ratio_mid20 = 0.154</li>
-<li>flux_percentile_ratio_mid35 = 0.275</li>
+<li>flux_percentile_ratio_mid35 = 0.275 </li>
 <li>flux_percentile_ratio_mid50 = 0.410</li>
 <li>flux_percentile_ratio_mid65 = 0.568</li>
 <li>flux_percentile_ratio_mid80 = 0.779</li>
@@ -5666,7 +5694,7 @@ In&nbsp;[38]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Range-of-a-cumulative-sum-\(R_{cs}\)">Range of a cumulative sum <span class="math">\(R_{cs}\)</span><a class="anchor-link" href="#Range-of-a-cumulative-sum-\(R_{cs}\)">&#182;</a></h4>
+<h4 id="Range-of-a-cumulative-sum-$R_{cs}$">Range of a cumulative sum $R_{cs}$<a class="anchor-link" href="#Range-of-a-cumulative-sum-$R_{cs}$">&#182;</a></h4>
 </div>
 </div>
 </div>
@@ -5676,10 +5704,11 @@ In&nbsp;[38]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><span class="math">\(R_{cs}\)</span> is the range of a cumulative sum (Ellaway 1978) of each light curve and is defined as:</p>
-<p><span class="math">\[R_{cs} = max(S) - min(S)\]</span> <span class="math">\[S_l = \frac{1}{N \sigma} \sum_{i=1}^l \left( m_i - \bar{m} \right) \]</span></p>
-<p>where max(min) is the maximum (minimum) value of S and <span class="math">\(l=1,2, \dots, N\)</span>.</p>
-<p><span class="math">\(R_{cs}\)</span> should take a value close to zero for a normal distribution:</p>
+<p>$R_{cs}$ is the range of a cumulative sum (Ellaway 1978) of each light curve and is defined as:</p>
+<p>$$R_{cs} = max(S) - min(S)$$
+$$S_l = \frac{1}{N \sigma} \sum_{i=1}^l \left( m_i - \bar{m} \right) $$</p>
+<p>where max(min) is the maximum (minimum) value of S and $l=1,2, \dots, N$. </p>
+<p>$R_{cs}$ should take a value close to zero for a normal distribution:</p>
 </div>
 </div>
 </div>
@@ -5766,7 +5795,7 @@ In&nbsp;[40]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="Mean-variance-\(\frac{\sigma}{\bar{m}}\)">Mean variance <span class="math">\(\frac{\sigma}{\bar{m}}\)</span><a class="anchor-link" href="#Mean-variance-\(\frac{\sigma}{\bar{m}}\)">&#182;</a></h4>
+<h4 id="Mean-variance-$\frac{\sigma}{\bar{m}}$">Mean variance $\frac{\sigma}{\bar{m}}$<a class="anchor-link" href="#Mean-variance-$\frac{\sigma}{\bar{m}}$">&#182;</a></h4>
 </div>
 </div>
 </div>
@@ -5776,7 +5805,7 @@ In&nbsp;[40]:
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>This is a simple variability index and is defined as the ratio of the standard deviation, <span class="math">\(\sigma\)</span>, to the mean magnitude, <span class="math">\(\bar{m}\)</span>. If a light curve has strong variability, <span class="math">\(\frac{\sigma}{\bar{m}}\)</span> of the light curve is generally large.</p>
+<p>This is a simple variability index and is defined as the ratio of the standard deviation, $\sigma$, to the mean magnitude, $\bar{m}$. If a light curve has strong variability, $\frac{\sigma}{\bar{m}}$ of the light curve is generally large.</p>
 <p>For a uniform distribution the mean-variance should take a value close to 0.577:</p>
 </div>
 </div>
@@ -5884,10 +5913,17 @@ In&nbsp;[42]:
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>In order to model the irregular sampled times series we use CAR(1), a continious time auto regressive model. CAR(1) process has three parameters, it provides a natural and consistent way of estimating a characteristic time scale and variance of lightcurves. CAR(1) process is described by the following stochastic differential equation:</p>
-<p><span class="math">\[ dX(t) = - \frac{1}{\tau} X(t)dt + \sigma_C \sqrt{dt} \epsilon(t) + bdt, \]</span> <span class="math">\[for \: \tau, \sigma_C, t \geq 0 \]</span></p>
-<p>where the mean value of the lightcurve <span class="math">\(X(t)\)</span> is <span class="math">\(b\tau\)</span> and the variance is <span class="math">\(\frac{\tau\sigma_C^2}{2}\)</span>. <span class="math">\(\tau\)</span> is the relaxation time of the process <span class="math">\(X(T)\)</span>, it can be interpreted as describing the variability amplitude of the time series. <span class="math">\(\sigma_C\)</span> can be interpreted as describing the variability of the time series on time scales shorter than <span class="math">\(\tau\)</span>. <span class="math">\(\epsilon(t)\)</span> is a white noise process with zero mean and variance equal to one. The likelihood function of a CAR(1) model for a lightcurve with observations <span class="math">\(x - \{x_1, \dots, x_n\}\)</span> observed at times <span class="math">\(\{t_1, \dots, t_n\}\)</span> with measurements error variances <span class="math">\(\{\delta_1^2, \dots, \delta_n^2\}\)</span> is:</p>
-<p><span class="math">\[ p \left( x|b,\sigma_C,\tau \right) = \prod_{i=1}^n \frac{1}{[2 \pi \left( \Omega_i + \delta_i^2 \right)]^{1/2}} exp \{ -\frac{1}{2} \frac{\left( \hat{x}_i - x^*_i \right)^2}{\Omega_i + \delta^2_i} \} \]</span> <span class="math">\[ x_i^* = x_i - b\tau\]</span> <span class="math">\[ \hat{x}_0 = 0 \]</span> <span class="math">\[ \Omega_0 = \frac{\tau \sigma^2_C}{2} \]</span> <span class="math">\[ \hat{x}_i = a_i\hat{x}_{i-1} + \frac{a_i \Omega_{i-1}}{\Omega_{i-1} + \delta^2_{i-1}} \left(x^*_{i-1} + \hat{x}_{i-1} \right) \]</span> <span class="math">\[ \Omega_i = \Omega_0 \left( 1- a_i^2 \right) + a_i^2 \Omega_{i-1} \left(1 - \frac{\Omega_{i-1}}{\Omega_{i-1} + \delta^2_{i-1}} \right) \]</span> <span class="math">\[ a_i = e^{-\left(t_i-t_{i-1}\right)/\tau} \]</span></p>
-<p>To find the optimal parameters we maximize the likelihood with respect to <span class="math">\(\sigma_C\)</span> and <span class="math">\(\tau\)</span> and calculate <span class="math">\(b\)</span> as the mean magnitude of the lightcurve divided by <span class="math">\(\tau\)</span>.</p>
+<p>$$ dX(t) = - \frac{1}{\tau} X(t)dt + \sigma_C \sqrt{dt} \epsilon(t) + bdt, $$
+$$for \: \tau, \sigma_C, t \geq 0 $$</p>
+<p>where the mean value of the lightcurve $X(t)$ is $b\tau$ and the variance is $\frac{\tau\sigma_C^2}{2}$. $\tau$ is the relaxation time of the process $X(T)$, it can be interpreted as describing the variability amplitude of the time series. $\sigma_C$ can be interpreted as describing the variability of the time series on time scales shorter than $\tau$. $\epsilon(t)$ is a white noise process with zero mean and variance equal to one. The likelihood function of a CAR(1) model for a lightcurve with observations $x - \{x_1, \dots, x_n\}$ observed at times $\{t_1, \dots, t_n\}$ with measurements error variances $\{\delta_1^2, \dots, \delta_n^2\}$ is:</p>
+<p>$$ p \left( x|b,\sigma_C,\tau \right) = \prod_{i=1}^n \frac{1}{[2 \pi \left( \Omega_i + \delta_i^2 \right)]^{1/2}} exp \{ -\frac{1}{2} \frac{\left( \hat{x}_i - x^*_i \right)^2}{\Omega_i + \delta^2_i} \} $$
+$$ x_i^* = x_i - b\tau$$
+$$ \hat{x}_0 = 0 $$
+$$ \Omega_0 = \frac{\tau \sigma^2_C}{2} $$
+$$ \hat{x}_i = a_i\hat{x}_{i-1} + \frac{a_i \Omega_{i-1}}{\Omega_{i-1} + \delta^2_{i-1}} \left(x^*_{i-1} + \hat{x}_{i-1} \right) $$ 
+$$ \Omega_i = \Omega_0 \left( 1- a_i^2 \right) + a_i^2 \Omega_{i-1} \left(1 - \frac{\Omega_{i-1}}{\Omega_{i-1} + \delta^2_{i-1}} \right) $$
+$$ a_i = e^{-\left(t_i-t_{i-1}\right)/\tau} $$</p>
+<p>To find the optimal parameters we maximize the likelihood with respect to $\sigma_C$ and $\tau$ and calculate $b$ as the mean magnitude of the lightcurve divided by $\tau$.</p>
 </div>
 </div>
 </div>
@@ -6031,63 +6067,6 @@ In&nbsp;[46]:
 
 </pre>
 </div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">
-In&nbsp;[47]:
-</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class="highlight"><pre><span class="n">HTML</span><span class="p">(</span><span class="s">&#39;&#39;&#39;&lt;script&gt;</span>
-<span class="s">code_show=true; </span>
-<span class="s">function code_toggle() {</span>
-<span class="s"> if (code_show){</span>
-<span class="s"> $(&#39;div.input&#39;).hide();</span>
-<span class="s"> } else {</span>
-<span class="s"> $(&#39;div.input&#39;).show();</span>
-<span class="s"> }</span>
-<span class="s"> code_show = !code_show</span>
-<span class="s">} </span>
-<span class="s">$( document ).ready(code_toggle);</span>
-<span class="s">&lt;/script&gt;</span>
-<span class="s">The raw code for this IPython notebook is by default hidden for easier reading.</span>
-<span class="s">To toggle on/off the raw code, click &lt;a href=&quot;javascript:code_toggle()&quot;&gt;here&lt;/a&gt;.&#39;&#39;&#39;</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt output_prompt">
-    Out[47]:</div>
-
-<div class="output_html rendered_html output_subarea output_pyout">
-<script>
-code_show=true; 
-function code_toggle() {
- if (code_show){
- $('div.input').hide();
- } else {
- $('div.input').show();
- }
- code_show = !code_show
-} 
-$( document ).ready(code_toggle);
-</script>
-The raw code for this IPython notebook is by default hidden for easier reading.
-To toggle on/off the raw code, click <a href="javascript:code_toggle()">here</a>.
-</div>
-
 </div>
 
 </div>
