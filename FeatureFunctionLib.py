@@ -91,36 +91,83 @@ class autocor(Base):
 
 
 class StetsonK_AC(Base):
-    def __init__(self):
+    def __init__(self, mjd):
 
         self.category='timeSeries'
+        self.mjd = mjd
 
-    def autocorrelation(self, data, lag):
-        N=len(data)
-        std= np.std(data)
-        m = np.mean(data)
-        suma = 0
+    # def autocorrelation(self, data, lag):
+    #     N=len(data)
+    #     std= np.std(data)
+    #     m = np.mean(data)
+    #     suma = 0
 
-        for i in xrange(N-lag):
-            suma += (data[i]- m)*(data[i+lag] - m)
+    #     for i in xrange(N-lag):
+    #         suma += (data[i]- m)*(data[i+lag] - m)
 
-        ac = 1/((N-lag)* std**2) * suma 
+    #     ac = 1/((N-lag)* std**2) * suma 
 
-        return ac
+    #     return ac
+
+
+    def slotted_autocorrelation(self, lc, k , T):
+
+
+        # make time start from 0
+        lc.index = map(lambda x: x - min(lc.index), lc.index)
+
+        # subtract mean from mag values
+        lc2 = lc.copy()
+
+        lc2['mag'] = lc2['mag'].subtract(lc2['mag'].mean())
+
+        min_time = min(lc2.index)
+        max_time = max(lc2.index)
+        current_time = lc2.index[0]
+        lag_time = current_time + k * T
+
+        N = 0
+        product_sum = 0
+        while lag_time < max_time - T/2.0:
+            # get all the points in the two bins (current_time bin and lag_time bin)
+            lc_points = lc2[np.logical_and(lc2.index >= current_time - T/2.0, lc2.index <= current_time + T/2.0)]
+            lc_points_lag = lc2[np.logical_and(lc2.index >= lag_time - T/2.0, lc2.index <= lag_time + T/2.0)]
+
+            current_time = current_time + T
+            lag_time = lag_time + T
+
+            if len(lc_points) == 0 or len(lc_points_lag) == 0:
+                continue
+
+            current_time_points = np.array(lc_points['mag'].tolist()).reshape((len(lc_points), 1))
+            lag_time_points = np.array(lc_points_lag['mag'].tolist()).reshape((1, len(lc_points_lag)))
+            mult_matrix = current_time_points.dot(lag_time_points)
+
+            product_sum = product_sum + mult_matrix.sum()
+            N = N + 1
+
+        return product_sum/float(N - 1)
 
     def fit(self, data):
         autocor_vector=[]
+        lc = pd.DataFrame(data, index = self.mjd, columns = ['mag'])
+        T=4
 
-        for i in xrange(len(data)/2):
-            autocor_vector.append(self.autocorrelation(data, i))
-
+        for i in xrange(40):
+            a = self.slotted_autocorrelation(lc, i, T)
+            if a == -0.0 or a == -np.infty or a == np.infty:
+                break
+            else:
+                autocor_vector.append(a)
+            #print autocor_vector
+            
         N_autocor = len(autocor_vector)
-        sigmap = np.sqrt(N_autocor*1.0/(N_autocor-1)) * (data-np.mean(autocor_vector))/np.std(autocor_vector)
-    
+        sigmap = np.sqrt(N_autocor*1.0/(N_autocor-1)) * (autocor_vector-np.mean(autocor_vector))/np.std(autocor_vector)
+
         K = 1/np.sqrt(N_autocor*1.0) * np.sum(np.abs(sigmap)) / np.sqrt(np.sum(sigmap**2))
 
         return K
-
+#PAparnatgnsidg
 
 
 class StetsonL(Base):
@@ -150,7 +197,8 @@ class StetsonL(Base):
 class Con(Base):
     '''
     Index introduced for selection of variable starts from OGLE database. 
-    To calculate Con, we counted the number of three consecutive starts that are out of 2sigma range, and normalized by N-2
+    To calculate Con, we counted the number of three consecutive measurements that are out of 2sigma range, and normalized by N-2
+    Pavlos not happy
     '''
     def __init__(self, consecutiveStar=3):
         self.category='timeSeries'
@@ -178,22 +226,22 @@ class Con(Base):
         return count*1.0/(N-self.consecutiveStar+1)
 
 
-class VariabilityIndex(Base):
+# class VariabilityIndex(Base):
 
-    # Eta
-    '''
-    The index is the ratio of mean of the square of successive difference to the variance of data points
-    '''
-    def __init__(self):
-        self.category='timeSeries'
+#     # Eta. Removed, it is not invariant to time sampling
+#     '''
+#     The index is the ratio of mean of the square of successive difference to the variance of data points
+#     '''
+#     def __init__(self):
+#         self.category='timeSeries'
         
 
-    def fit(self, data):
+#     def fit(self, data):
 
-        N = len(data)
-        sigma2 = np.var(data)
+#         N = len(data)
+#         sigma2 = np.var(data)
         
-        return 1.0/((N-1)*sigma2) * np.sum(np.power(data[1:] - data[:-1] , 2))
+#         return 1.0/((N-1)*sigma2) * np.sum(np.power(data[1:] - data[:-1] , 2))
 
 
 class B_R(Base):
@@ -223,7 +271,9 @@ class Amplitude(Base):
         self.category='basic'
 
     def fit(self, data):
-        return (np.max(data) - np.min(data)) / 2
+        N = len(data)
+        sorted = np.sort(data)
+        return (np.median(sorted[-0.05*N:]) - np.median(sorted[0:0.05*N]))  / 2
 
 class Beyond1Std(Base):
     '''
@@ -337,7 +387,7 @@ class MaxSlope(Base):
         self.mjd = mjd
 
     def fit(self, data):
-        max_slope = 0
+        max_slope =  0           
 
         index = self.mjd
 
@@ -663,8 +713,9 @@ class AndersonDarling(Base):
 
     def fit(self,data):
 
+        ander = stats.anderson(data)[0]
+        return 1/(1.0+np.exp(-10*(ander-0.3)))
 
-        return stats.anderson(data)[0]
 
 
 

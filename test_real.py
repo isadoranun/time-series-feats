@@ -26,10 +26,10 @@ if len(data) != len(second_data):
 
 
 #Calculating the features
-a = FeatureSpace(featureList=['StetsonL', 'StetsonJ', 'Q31B_R', 'Eta_B_R'], automean=[0,0], StetsonL=[aligned_second_data, aligned_data] ,  B_R=second_data, Beyond1Std=error, StetsonJ=[aligned_second_data, aligned_data], MaxSlope=mjd, LinearTrend=mjd, Eta_B_R=[aligned_second_data, aligned_data], Eta_e=mjd, Q31B_R=[aligned_second_data, aligned_data], PeriodLS=mjd, CAR_sigma=[mjd, error], SlottedA = mjd)
+a = FeatureSpace(featureList=['StetsonK_AC'], automean=[0,0], StetsonK_AC=mjd, StetsonL=[aligned_second_data, aligned_data] ,  B_R=second_data, Beyond1Std=error, StetsonJ=[aligned_second_data, aligned_data], MaxSlope=mjd, LinearTrend=mjd, Eta_B_R=[aligned_second_data, aligned_data], Eta_e=mjd, Q31B_R=[aligned_second_data, aligned_data], PeriodLS=mjd, CAR_sigma=[mjd, error], SlottedA = mjd)
 a=a.calculateFeature(data)
 
-print a.result(method='features')
+print a.result(method='dict')
 
 # nombres = a.result(method='features')
 # guardar = np.vstack((nombres,a.result(method='array')))
