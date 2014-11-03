@@ -9,7 +9,7 @@ from scipy.optimize import minimize
 
 import lomb
 import math
-
+import bisect
 
 class Rcs(Base):
     #Range of cumulative sum
@@ -89,77 +89,69 @@ class autocor(Base):
             lag = lag + 1
         return lag
 
+class SlottedA(Base):
 
-class StetsonK_AC(Base):
     def __init__(self, mjd):
+        """
+        lc: MACHO lightcurve in a pandas DataFrame
+        k: lag (default: 1)
+        T: tau (slot size in days. default: 4)
+        """
+        self.category = 'timeSeries'
+        SlottedA.SAC =[]
 
-        self.category='timeSeries'
         self.mjd = mjd
 
-    # def autocorrelation(self, data, lag):
-    #     N=len(data)
-    #     std= np.std(data)
-    #     m = np.mean(data)
-    #     suma = 0
 
-    #     for i in xrange(N-lag):
-    #         suma += (data[i]- m)*(data[i+lag] - m)
-
-    #     ac = 1/((N-lag)* std**2) * suma 
-
-    #     return ac
-
-
-    def slotted_autocorrelation(self, lc, k , T):
-
-
+    def slotted_autocorrelation(self, data, mjd, T, K):
+    
         # make time start from 0
-        lc.index = map(lambda x: x - min(lc.index), lc.index)
+        mjd = mjd - np.min(mjd)
 
         # subtract mean from mag values
-        lc2 = lc.copy()
+        m = np.mean(data)
+        data = data - m
 
-        lc2['mag'] = lc2['mag'].subtract(lc2['mag'].mean())
+        T=1
+        K=40
+        prod = np.zeros((K,1))
+        pairs = np.subtract.outer(mjd, mjd)
+        pairs[np.tril_indices_from(pairs)] = 10000000
 
-        min_time = min(lc2.index)
-        max_time = max(lc2.index)
-        current_time = lc2.index[0]
-        lag_time = current_time + k * T
+        ks = np.int64(np.floor(np.abs(pairs)/T + 0.5))
 
-        N = 0
-        product_sum = 0
-        while lag_time < max_time - T/2.0:
-            # get all the points in the two bins (current_time bin and lag_time bin)
-            lc_points = lc2[np.logical_and(lc2.index >= current_time - T/2.0, lc2.index <= current_time + T/2.0)]
-            lc_points_lag = lc2[np.logical_and(lc2.index >= lag_time - T/2.0, lc2.index <= lag_time + T/2.0)]
+        for k in np.arange(1, K):
+            idx = np.where(ks==k)
+            prod[k] = sum(data[idx[0]]*data[idx[1]]) / (len(idx[0])-1 )
 
-            current_time = current_time + T
-            lag_time = lag_time + T
+        idx = np.where(ks==0)
+        prod[0] = (sum(data**2) + sum(data[idx[0]]*data[idx[1]])) / (len(idx[0]) + len(data)-1 )
+        return prod/prod[0]
 
-            if len(lc_points) == 0 or len(lc_points_lag) == 0:
-                continue
-
-            current_time_points = np.array(lc_points['mag'].tolist()).reshape((len(lc_points), 1))
-            lag_time_points = np.array(lc_points_lag['mag'].tolist()).reshape((1, len(lc_points_lag)))
-            mult_matrix = current_time_points.dot(lag_time_points)
-
-            product_sum = product_sum + mult_matrix.sum()
-            N = N + 1
-
-        return product_sum/float(N - 1)
 
     def fit(self, data):
-        autocor_vector=[]
-        lc = pd.DataFrame(data, index = self.mjd, columns = ['mag'])
-        T=4
 
-        for i in xrange(40):
-            a = self.slotted_autocorrelation(lc, i, T)
-            if a == -0.0 or a == -np.infty or a == np.infty:
-                break
-            else:
-                autocor_vector.append(a)
-            #print autocor_vector
+        T=4
+        SAC = self.slotted_autocorrelation(data, self.mjd, T, K=1000)
+        SlottedA.SAC = SAC
+
+        k = bisect.bisect(SAC, np.exp(-1))
+
+        return k*T  
+
+    def getAtt(self):
+        return SlottedA.SAC
+
+class StetsonK_AC(SlottedA):
+
+    def __init__(self):
+
+        self.category='timeSeries'
+
+    def fit(self, data):
+        
+        a = StetsonK_AC()
+        autocor_vector = a.getAtt()
             
         N_autocor = len(autocor_vector)
         sigmap = np.sqrt(N_autocor*1.0/(N_autocor-1)) * (autocor_vector-np.mean(autocor_vector))/np.std(autocor_vector)
@@ -167,7 +159,6 @@ class StetsonK_AC(Base):
         K = 1/np.sqrt(N_autocor*1.0) * np.sum(np.abs(sigmap)) / np.sqrt(np.sum(sigmap**2))
 
         return K
-#PAparnatgnsidg
 
 
 class StetsonL(Base):
@@ -617,8 +608,9 @@ class Eta_B_R(Base):
         # if second_data is None:
         #     print "please provide another data series to compute Eta_B_R"
         #     sys.exit(1)
-        self.data2 = entry[0]
-        self.aligned_data = entry[1]
+        self.data2 = np.asarray(entry[0])
+        self.aligned_data = np.asarray(entry[1])
+        self.mjd = np.asarray(entry[2])
         
 
     def fit(self, data):
@@ -626,10 +618,26 @@ class Eta_B_R(Base):
 
         N = len(self.aligned_data)
         B_Rdata=self.aligned_data-self.data2;
-        # N = len(B_Rdata)
-        sigma2 = np.var(B_Rdata)
+        # # N = len(B_Rdata)
+        # sigma2 = np.var(B_Rdata)
         
-        return 1.0/((N-1)*sigma2) * np.sum(np.power(B_Rdata[1:] - B_Rdata[:-1] , 2))
+        # return 1.0/((N-1)*sigma2) * np.sum(np.power(B_Rdata[1:] - B_Rdata[:-1] , 2))
+
+        w = 1.0 / np.power(self.mjd[1:]-self.mjd[:-1] ,2)
+        w_mean = np.mean(w)
+
+        N = len(self.mjd)
+        sigma2=np.var(B_Rdata)
+
+        suma = 0
+        suma2 = 0
+        for i in xrange(N-1):
+            suma += w[i]*(B_Rdata[i+1]-B_Rdata[i])**2
+            suma2 += w[i]
+
+        eta_B_R = w_mean * np.power(self.mjd[N-1]-self.mjd[0],2) * suma / (sigma2 * suma2 * N**2)
+
+        return eta_B_R
 
 
 class Eta_e(Base):
@@ -855,76 +863,7 @@ class CAR_tmean(CAR_sigma):
 
 
 
-class SlottedA(Base):
 
-    def __init__(self, mjd):
-        """
-        lc: MACHO lightcurve in a pandas DataFrame
-        k: lag (default: 1)
-        T: tau (slot size in days. default: 4)
-        """
-        self.category = 'timeSeries'
-
-
-        self.mjd = mjd
-
-
-    def slotted_autocorrelation(self, lc, k , T):
-
-
-        # make time start from 0
-        lc.index = map(lambda x: x - min(lc.index), lc.index)
-
-        # subtract mean from mag values
-        lc2 = lc.copy()
-
-        lc2['mag'] = lc2['mag'].subtract(lc2['mag'].mean())
-
-        min_time = min(lc2.index)
-        max_time = max(lc2.index)
-        current_time = lc2.index[0]
-        lag_time = current_time + k * T
-
-        N = 0
-        product_sum = 0
-        while lag_time < max_time - T/2.0:
-            # get all the points in the two bins (current_time bin and lag_time bin)
-            lc_points = lc2[np.logical_and(lc2.index >= current_time - T/2.0, lc2.index <= current_time + T/2.0)]
-            lc_points_lag = lc2[np.logical_and(lc2.index >= lag_time - T/2.0, lc2.index <= lag_time + T/2.0)]
-
-            current_time = current_time + T
-            lag_time = lag_time + T
-
-            if len(lc_points) == 0 or len(lc_points_lag) == 0:
-                continue
-
-            current_time_points = np.array(lc_points['mag'].tolist()).reshape((len(lc_points), 1))
-            lag_time_points = np.array(lc_points_lag['mag'].tolist()).reshape((1, len(lc_points_lag)))
-            mult_matrix = current_time_points.dot(lag_time_points)
-
-            product_sum = product_sum + mult_matrix.sum()
-            N = N + 1
-
-        return product_sum/float(N - 1)
-
-
-    def fit(self, data):
-
-
-        lc = pd.DataFrame(data, index = self.mjd, columns = ['mag'])
-
-        threshold = math.exp(-1)
-        norm_value = self.slotted_autocorrelation(lc, k=0, T=4)
-
-        T = 4
-        k = 1
-        current_autocorr_value = 1
-
-        while current_autocorr_value > threshold:
-            current_autocorr_value = self.slotted_autocorrelation(lc, k=k, T=T)/norm_value
-            k = k + 1
-
-        return k*T
 
    
 
