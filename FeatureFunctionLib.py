@@ -135,7 +135,8 @@ class SlottedA(Base):
         SAC = self.slotted_autocorrelation(data, self.mjd, T, K=1000)
         SlottedA.SAC = SAC
 
-        k = bisect.bisect(SAC, np.exp(-1))
+        k = next((index for index,value in enumerate(SAC) if value < np.exp(-1)), None)
+
 
         return k*T  
 
