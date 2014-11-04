@@ -15,14 +15,12 @@ warnings.filterwarnings('ignore')
 
 
 path = '/Volumes/LaCie/MACHO_LMC/F_1/'
+# path = '/Users/isadoranun/Dropbox/lightcurves/'
 #path2 = '/Volumes/LaCie/MACHO_LMC/'
 #path = os.getcwd()
 
 count = 0
-
-#guardar = np.zeros(shape=(1,42))
-guardar = np.zeros(shape=(1,2))
-
+check = False
 
 for j in os.listdir(path):
     
@@ -34,17 +32,18 @@ for j in os.listdir(path):
 
         tar = tarfile.open(path + j, 'r')
 
-
         for member in tar.getmembers():
 
         	if member.name.endswith("B.mjd"):
 
         		id = member.name.split('lc_')[1]
 
+
         		for member2 in tar.getmembers():
 
         			if member2.name == (member.name[:-5] + 'R.mjd'):	
 
+        				check = True
 	    				f = tar.extractfile(member)
 	    				g = tar.extractfile(member2)
 
@@ -69,12 +68,12 @@ for j in os.listdir(path):
 	    					aligned_data = data
 	    					aligned_second_data = second_data
 	    					aligned_mjd = mjd
-	    				a = FeatureSpace(featureList=['Bmean'], automean=[0,0], StetsonL=[aligned_second_data, aligned_data] , StetsonK_AC=mjd, B_R=second_data, Beyond1Std=error, StetsonJ=[aligned_second_data, aligned_data], MaxSlope=mjd, LinearTrend=mjd, Eta_B_R=[aligned_second_data, aligned_data, aligned_mjd], Eta_e=mjd, Q31B_R=[aligned_second_data, aligned_data], PeriodLS=mjd, CAR_sigma=[mjd, error], SlottedA = mjd)
+	    				a = FeatureSpace(featureList=['Bmean'], automean=[0,0], StetsonL=[aligned_second_data, aligned_data] , B_R=second_data, Beyond1Std=error, StetsonJ=[aligned_second_data, aligned_data], MaxSlope=mjd, LinearTrend=mjd, Eta_B_R=[aligned_second_data, aligned_data, aligned_mjd], Eta_e=mjd, Q31B_R=[aligned_second_data, aligned_data], PeriodLS=mjd, CAR_sigma=[mjd, error], SlottedA = mjd)
 
 	    				try:
-	    					contador = contador + 1
 	    					a=a.calculateFeature(data)
 	    					idx = [id[:-6]]
+	    					contador = contador + 1
 
 	    					if contador == 1:
 	    						df = pd.DataFrame(a.result(method='array'), columns = a.result(method='features'), index =idx)
@@ -87,11 +86,15 @@ for j in os.listdir(path):
 	    				except:
 	    					pass
 	 
-	folder = (member.name.split('lc')[0]).split('/')[0]
-	field = (member.name.split('lc')[0]).split('/')[1]
-	file_name = folder + '_' + field + '.csv'
+	
 	#file_name = folder  + '.csv'
-	df.to_csv(file_name) 
+	if check:	
+		folder = (member.name.split('lc')[0]).split('/')[0]
+		field = (member.name.split('lc')[0]).split('/')[1]
+		file_name = folder + '_' + field + '.csv'		
+		df.to_csv(file_name) 
+		check = False
+
 
 	# if count == 1:
 	# 	folder = (member.name.split('lc')[0]).split('/')[0]

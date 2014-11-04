@@ -106,6 +106,8 @@ class SlottedA(Base):
     def slotted_autocorrelation(self, data, mjd, T, K):
     
         # make time start from 0
+        slots = []
+        slots.append(0)
         mjd = mjd - np.min(mjd)
 
         # subtract mean from mag values
@@ -120,27 +122,32 @@ class SlottedA(Base):
 
         for k in np.arange(1, K):
             idx = np.where(ks==k)
-            prod[k] = sum(data[idx[0]]*data[idx[1]]) / (len(idx[0])-1 )
+            if len(idx[0]) != 0:
+                prod[k] = sum(data[idx[0]]*data[idx[1]]) / (len(idx[0]))
+                slots.append(k)
+            else:
+                prod[k] = np.infty
 
         idx = np.where(ks==0)
-        prod[0] = (sum(data**2) + sum(data[idx[0]]*data[idx[1]])) / (len(idx[0]) + len(data)-1 )
-        return prod/prod[0]
+        prod[0] = (sum(data**2) + sum(data[idx[0]]*data[idx[1]])) / (len(idx[0]) + len(data))
+        return prod/prod[0], np.asarray(slots)
 
 
     def fit(self, data):
 
         T=4
-        K=1000
-        SAC = self.slotted_autocorrelation(data, self.mjd, T, K)
+        K=200
+        [SAC, slots] = self.slotted_autocorrelation(data, self.mjd, T, K)
         SlottedA.SAC = SAC
+        SlottedA.slots = slots
 
-        k = next((index for index,value in enumerate(SAC) if value < np.exp(-1)), None)
+        SAC2 = SAC[slots]
+        k = next((index for index,value in enumerate(SAC2) if value < np.exp(-1)), None)
 
-
-        return k*T  
+        return slots[k]*T  
 
     def getAtt(self):
-        return SlottedA.SAC
+        return SlottedA.SAC, SlottedA.slots
 
 class StetsonK_AC(SlottedA):
 
@@ -151,8 +158,9 @@ class StetsonK_AC(SlottedA):
     def fit(self, data):
         
         a = StetsonK_AC()
-        autocor_vector = a.getAtt()
-            
+        [autocor_vector, slots] = a.getAtt()
+        
+        autocor_vector = autocor_vector[slots]    
         N_autocor = len(autocor_vector)
         sigmap = np.sqrt(N_autocor*1.0/(N_autocor-1)) * (autocor_vector-np.mean(autocor_vector))/np.std(autocor_vector)
 
@@ -722,7 +730,8 @@ class AndersonDarling(Base):
     def fit(self,data):
 
         ander = stats.anderson(data)[0]
-        return 1/(1.0+np.exp(-10*(ander-0.3)))
+        return ander
+        #return 1/(1.0+np.exp(-10*(ander-0.3)))
 
 
 
