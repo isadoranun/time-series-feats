@@ -112,8 +112,6 @@ class SlottedA(Base):
         m = np.mean(data)
         data = data - m
 
-        T=1
-        K=40
         prod = np.zeros((K,1))
         pairs = np.subtract.outer(mjd, mjd)
         pairs[np.tril_indices_from(pairs)] = 10000000
@@ -132,7 +130,8 @@ class SlottedA(Base):
     def fit(self, data):
 
         T=4
-        SAC = self.slotted_autocorrelation(data, self.mjd, T, K=1000)
+        K=1000
+        SAC = self.slotted_autocorrelation(data, self.mjd, T, K)
         SlottedA.SAC = SAC
 
         k = next((index for index,value in enumerate(SAC) if value < np.exp(-1)), None)
