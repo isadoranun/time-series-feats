@@ -11,6 +11,19 @@ import lomb
 import math
 import bisect
 
+class Amplitude(Base):
+    '''
+    Half the difference between the maximum and the minimum magnitude
+    '''
+
+    def __init__(self):
+        self.category='basic'
+
+    def fit(self, data):
+        N = len(data)
+        sorted = np.sort(data)
+        return (np.median(sorted[-0.05*N:]) - np.median(sorted[0:0.05*N]))  / 2
+
 class Rcs(Base):
     #Range of cumulative sum
     def __init__(self):
@@ -71,10 +84,9 @@ class autocor(Base):
         m = np.mean(data)
         suma = 0
 
-        for i in xrange(N-lag):
-            suma += (data[i]- m)*(data[i+lag] - m)
+        S = sum((data[:N-lag]-m)*(data[lag:N]-m))
 
-        ac = 1/((N-lag)* std**2) * suma 
+        ac = 1/((N-lag)* std**2) * S
 
         return ac
         
@@ -103,11 +115,12 @@ class SlottedA(Base):
         self.mjd = mjd
 
 
-    def slotted_autocorrelation(self, data, mjd, T, K):
+    def slotted_autocorrelation(self, data, mjd, T, K, second_round=False, K1=100):
     
+        slots = np.zeros((K,1))
+        i=1
+
         # make time start from 0
-        slots = []
-        slots.append(0)
         mjd = mjd - np.min(mjd)
 
         # subtract mean from mag values
@@ -120,29 +133,53 @@ class SlottedA(Base):
 
         ks = np.int64(np.floor(np.abs(pairs)/T + 0.5))
 
-        for k in np.arange(1, K):
-            idx = np.where(ks==k)
-            if len(idx[0]) != 0:
-                prod[k] = sum(data[idx[0]]*data[idx[1]]) / (len(idx[0]))
-                slots.append(k)
-            else:
-                prod[k] = np.infty
-
+        #We calculate the slotted autocorrelation for k=0 separately
         idx = np.where(ks==0)
         prod[0] = (sum(data**2) + sum(data[idx[0]]*data[idx[1]])) / (len(idx[0]) + len(data))
-        return prod/prod[0], np.asarray(slots)
+        slots[0] = 0
+
+        #We calculate it for the rest of the ks
+        if second_round == False:
+            for k in np.arange(1, K):
+                idx = np.where(ks==k)
+                if len(idx[0]) != 0:
+                    prod[k] = sum(data[idx[0]]*data[idx[1]]) / (len(idx[0]))
+                    slots[i] = k
+                    i = i + 1
+                else:
+                    prod[k] = np.infty
+        else:
+            for k in np.arange(K1, K):
+                idx = np.where(ks==k)
+                if len(idx[0]) != 0:
+                    prod[k] = sum(data[idx[0]]*data[idx[1]]) / (len(idx[0]))
+                    slots[i-1] = k
+                    i= i+1
+                else:
+                    prod[k] = np.infty
+            np.trim_zeros(prod, trim='b')
+
+        slots = np.trim_zeros(slots, trim='b')
+        return prod/prod[0], np.int64(slots).flatten()
 
 
     def fit(self, data):
 
         T=4
-        K=200
-        [SAC, slots] = self.slotted_autocorrelation(data, self.mjd, T, K)
+        K1=100
+        [SAC, slots] = self.slotted_autocorrelation(data, self.mjd, T, K1)
         SlottedA.SAC = SAC
         SlottedA.slots = slots
 
         SAC2 = SAC[slots]
         k = next((index for index,value in enumerate(SAC2) if value < np.exp(-1)), None)
+
+        if k == None:
+            K2=200
+            [SAC, slots] = self.slotted_autocorrelation(data, self.mjd, T, K2, second_round=True, K1=K1)
+            SAC2 = SAC[slots]
+            k = next((index for index,value in enumerate(SAC2) if value < np.exp(-1)), None)
+
 
         return slots[k]*T  
 
@@ -261,19 +298,6 @@ class B_R(Base):
 
 # The categories of the following featurs should be revised
 
-class Amplitude(Base):
-    '''
-    Half the difference between the maximum and the minimum magnitude
-    '''
-
-    def __init__(self):
-        self.category='basic'
-
-    def fit(self, data):
-        N = len(data)
-        sorted = np.sort(data)
-        return (np.median(sorted[-0.05*N:]) - np.median(sorted[0:0.05*N]))  / 2
-
 class Beyond1Std(Base):
     '''
     Percentage of points beyond one st. dev. from the weighted (by photometric errors) mean
@@ -292,17 +316,13 @@ class Beyond1Std(Base):
         weighted_mean = np.average(data, weights= 1 / self.error**2)
 
         # Standard deviation with respect to the weighted mean
-        var = 0
-        for i in xrange(n):
-            var += ((data[i]) - weighted_mean)**2
+
+        var = sum((data-weighted_mean)**2)
         std = np.sqrt( (1.0/(n-1)) * var )
 
-        fraction = 0.0
-        for i in xrange(n):
-            if data[i] > weighted_mean + std or data[i] < weighted_mean - std:
-                fraction += 1
+        count = np.sum(np.logical_or(data>weighted_mean + std , data < weighted_mean - std))
 
-        return fraction / n
+        return float(count)/n
 
 class SmallKurtosis(Base):
     '''
@@ -317,14 +337,12 @@ class SmallKurtosis(Base):
         mean = np.mean(data)
         std = np.std(data)
 
-        suma = 0
-        for i in xrange(n):
-            suma += ((data[i] - mean) / std)**4
+        S = sum(((data-mean)/std)**4)
 
         c1 = float(n*(n + 1)) / ((n - 1)*(n - 2)*(n - 3))
         c2 = float(3 * (n - 1)**2) / ((n-2)*(n-3))
 
-        return c1 * suma - c2
+        return c1 * S - c2
 
 class Std(Base):
     '''
@@ -386,17 +404,11 @@ class MaxSlope(Base):
         self.mjd = mjd
 
     def fit(self, data):
-        max_slope =  0           
 
-        index = self.mjd
+        slope = np.abs(data[1:] - data[:-1]) / (self.mjd[1:] - self.mjd[:-1])
+        np.max(slope)
 
-        for i in xrange(len(data) - 1):
-            slope = float(np.abs(data[i+1] - data[i]) / (index[i+1] - index[i]))
-
-            if slope > max_slope:
-                max_slope = slope
-
-        return max_slope
+        return np.max(slope)
 
 class MedianAbsDev(Base):
 
@@ -406,9 +418,7 @@ class MedianAbsDev(Base):
     def fit(self, data):
         median = np.median(data)
 
-        devs = []
-        for i in xrange(len(data)):
-            devs.append(abs(data[i] - median))
+        devs=(abs(data - median))
 
         return np.median(devs)
 
@@ -445,16 +455,7 @@ class PairSlopeTrend(Base):
     def fit(self, data):
         data_last = data[-30:]
 
-        inc = 0.0
-        dec = 0.0
-
-        for i in xrange(29):
-            if data_last[i + 1] - data_last[i] > 0:
-                inc += 1
-            else:
-                dec += 1
-
-        return (inc - dec) / 30
+        return float(len(np.where(np.diff(data_last)>0)[0]) - len(np.where(np.diff(data_last)<=0)[0]))/30
 
 class FluxPercentileRatioMid20(Base):
 
@@ -637,13 +638,10 @@ class Eta_B_R(Base):
         N = len(self.mjd)
         sigma2=np.var(B_Rdata)
 
-        suma = 0
-        suma2 = 0
-        for i in xrange(N-1):
-            suma += w[i]*(B_Rdata[i+1]-B_Rdata[i])**2
-            suma2 += w[i]
+        S1 = sum(w*(B_Rdata[1:]-B_Rdata[:-1])**2)
+        S2 = sum(w)
 
-        eta_B_R = w_mean * np.power(self.mjd[N-1]-self.mjd[0],2) * suma / (sigma2 * suma2 * N**2)
+        eta_B_R = w_mean * np.power(self.mjd[N-1]-self.mjd[0],2) * S1 / (sigma2 * S2 * N**2)
 
         return eta_B_R
 
@@ -667,13 +665,11 @@ class Eta_e(Base):
         N = len(self.mjd)
         sigma2=np.var(data)
 
-        suma = 0
-        suma2 = 0
-        for i in xrange(N-1):
-            suma += w[i]*(data[i+1]-data[i])**2
-            suma2 += w[i]
 
-        eta_e = w_mean * np.power(self.mjd[N-1]-self.mjd[0],2) * suma / (sigma2 * suma2 * N**2)
+        S1 = sum(w*(data[1:]-data[:-1])**2)
+        S2 = sum(w)
+
+        eta_e = w_mean * np.power(self.mjd[N-1]-self.mjd[0],2) * S1 / (sigma2 * S2 * N**2)
 
         return eta_e
        
@@ -799,6 +795,16 @@ class CAR_sigma(Base):
         a = []
         x_ast = []
 
+        # Omega = np.zeros((num_datos,1))
+        # x_hat = np.zeros((num_datos,1))
+        # a = np.zeros((num_datos,1))
+        # x_ast = np.zeros((num_datos,1))
+
+        # Omega[0]=(tau*(sigma**2))/2.
+        # x_hat[0]=0.
+        # a[0]=0.
+        # x_ast[0]=x[0] - b*tau
+
         Omega.append((tau*(sigma**2))/2.)
         x_hat.append(0.)
         a.append(0.)
@@ -812,6 +818,10 @@ class CAR_sigma(Base):
             x_ast.append(x[i] - b*tau)
             x_hat.append(a_new*x_hat[i-1] + (a_new*Omega[i-1]/(Omega[i-1] + error_vars[i-1]))*(x_ast[i-1]-x_hat[i-1]))
             Omega.append(Omega[0]*(1-(a_new**2)) + ((a_new**2))*Omega[i-1]*( 1 - (Omega[i-1]/(Omega[i-1]+ error_vars[i-1]))))
+
+            # x_ast[i]=x[i] - b*tau
+            # x_hat[i]=a_new*x_hat[i-1] + (a_new*Omega[i-1]/(Omega[i-1] + error_vars[i-1]))*(x_ast[i-1]-x_hat[i-1])
+            # Omega[i]=Omega[0]*(1-(a_new**2)) + ((a_new**2))*Omega[i-1]*( 1 - (Omega[i-1]/(Omega[i-1]+ error_vars[i-1])))
 
             loglik_inter = np.log( ((2*np.pi*(Omega[i] + error_vars[i]))**-0.5) * (np.exp( -0.5 * ( ((x_hat[i]-x_ast[i])**2) / (Omega[i] + error_vars[i]))) + epsilon))
             loglik = loglik + loglik_inter

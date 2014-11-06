@@ -43,7 +43,6 @@ for j in os.listdir(path):
 
         			if member2.name == (member.name[:-5] + 'R.mjd'):	
 
-        				check = True
 	    				f = tar.extractfile(member)
 	    				g = tar.extractfile(member2)
 
@@ -68,31 +67,30 @@ for j in os.listdir(path):
 	    					aligned_data = data
 	    					aligned_second_data = second_data
 	    					aligned_mjd = mjd
-	    				a = FeatureSpace(featureList=['Bmean'], automean=[0,0], StetsonL=[aligned_second_data, aligned_data] , B_R=second_data, Beyond1Std=error, StetsonJ=[aligned_second_data, aligned_data], MaxSlope=mjd, LinearTrend=mjd, Eta_B_R=[aligned_second_data, aligned_data, aligned_mjd], Eta_e=mjd, Q31B_R=[aligned_second_data, aligned_data], PeriodLS=mjd, CAR_sigma=[mjd, error], SlottedA = mjd)
+	    				a = FeatureSpace(category='all',featureList=None, automean=[0,0], StetsonL=[aligned_second_data, aligned_data] , B_R=second_data, Beyond1Std=error, StetsonJ=[aligned_second_data, aligned_data], MaxSlope=mjd, LinearTrend=mjd, Eta_B_R=[aligned_second_data, aligned_data, aligned_mjd], Eta_e=mjd, Q31B_R=[aligned_second_data, aligned_data], PeriodLS=mjd, CAR_sigma=[mjd, error], SlottedA = mjd)
 
 	    				try:
 	    					a=a.calculateFeature(data)
 	    					idx = [id[:-6]]
 	    					contador = contador + 1
+	    					check = True
+
 
 	    					if contador == 1:
-	    						df = pd.DataFrame(a.result(method='array'), columns = a.result(method='features'), index =idx)
-
-	    					#df.to_csv('sabrina.csv')
+	    						print "contador1"
+	    						df = pd.DataFrame(a.result(method='array').reshape((1,len(a.result(method='array')))), columns = a.result(method='features'), index =[idx])
+	    						print "hice mi primer data frame"	
 	    					else:
-	    						df2 = pd.DataFrame(a.result(method='array'), columns = a.result(method='features'), index =idx)
+	    						df2 = pd.DataFrame(a.result(method='array').reshape((1,len(a.result(method='array')))), columns = a.result(method='features'), index =[idx])
 	    						df = pd.concat([df, df2])
 
 	    				except:
 	    					pass
-	 
-	
-	#file_name = folder  + '.csv'
-	if check:	
+	if check:
 		folder = (member.name.split('lc')[0]).split('/')[0]
 		field = (member.name.split('lc')[0]).split('/')[1]
-		file_name = folder + '_' + field + '.csv'		
-		df.to_csv(file_name) 
+		file_name = folder + '_' + field + '.csv'
+		df.to_csv(file_name)
 		check = False
 
 

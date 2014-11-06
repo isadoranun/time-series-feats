@@ -17,11 +17,14 @@
 {% endblock input_group %}
 
 {% block output_group %}
+{% if cell.metadata.hide == True %}
+{% else %}
 <div class="output_wrapper">
 <div class="output">
 {{ super() }}
 </div>
 </div>
+{% endif %}
 {% endblock output_group %}
 
 {% block in_prompt -%}
