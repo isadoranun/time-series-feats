@@ -2,6 +2,7 @@ import os,sys,time
 import numpy as np
 import pandas as pd
 from scipy import stats
+import time
 
 from Base import Base
 
@@ -33,7 +34,7 @@ class Rcs(Base):
         sigma = np.std(data)
         N = len(data)
         m = np.mean(data)
-        s = (np.cumsum(data)-m)*1.0/(N*sigma)
+        s = np.cumsum(data-m)*1.0/(N*sigma)
         R = np.max(s) - np.min(s)
         return R
    
@@ -49,7 +50,7 @@ class StetsonK(Base):
         return K
 
 
-class automean(Base):
+class Automean(Base):
     '''
     This is just a prototype, not a real feature
     '''
@@ -63,7 +64,7 @@ class automean(Base):
     def fit(self, data):
         return np.mean(data)+self.length+self.length2
 
-class meanvariance(Base):
+class Meanvariance(Base):
     # variability index
     def __init__(self): 
         self.category='basic'
@@ -71,10 +72,8 @@ class meanvariance(Base):
     def fit(self, data):
         return np.std(data)/np.mean(data)
 
-
-
     
-class autocor(Base):
+class Autocor(Base):
     def __init__(self):
         self.category='timeSeries'
 
@@ -436,12 +435,9 @@ class MedianBRP(Base):
         amplitude = ( np.max(data) - np.min(data) ) / 10
         n = len(data)
 
-        fraction = 0.0
-        for i in xrange(n):
-            if data[i] < median + amplitude and data[i] > median - amplitude:
-                fraction += 1
+        count = np.sum(np.logical_and(data < median + amplitude , data > median - amplitude))
 
-        return fraction / n
+        return float(count) / n
 
 class PairSlopeTrend(Base):
     '''
@@ -726,15 +722,14 @@ class AndersonDarling(Base):
     def fit(self,data):
 
         ander = stats.anderson(data)[0]
-        return ander
-        #return 1/(1.0+np.exp(-10*(ander-0.3)))
-
-
+        #return ander
+        return 1/(1.0+np.exp(-10*(ander-0.3)))
 
 
 class PeriodLS(Base):
 
     def __init__(self,mjd):
+
 
         self.category='timeSeries'
 
@@ -745,25 +740,83 @@ class PeriodLS(Base):
 
     def fit(self,data):
 
-        fx,fy, nout, jmax, prob = lomb.fasper(self.mjd,data, 6., 100.)
-        PeriodLS.prob = prob
+        global new_mjd
+        global prob
 
-        return 1.0 / fx[jmax] 
+        fx,fy, nout, jmax, prob  = lomb.fasper(self.mjd,data, 6., 100.)
+        T = 1.0 / fx[jmax] 
+        new_mjd = np.mod(self.mjd, 2*T) / (2*T);
 
-    def getPeriod_fit(self):
-
-        return PeriodLS.prob
+        return T
 
 
-class Period_fit(PeriodLS):
+class Period_fit(Base):
 
     def __init__(self):
+
         self.category='timeSeries'
 
     def fit(self, data):
 
-        a = Period_fit()
-        return a.getPeriod_fit()
+        # a = Period_fit()
+        # return a.getPeriod_fit()
+
+        return prob
+
+
+
+class Psi_CS(Base):
+
+    def __init__(self, mjd):
+
+        self.category='timeSeries'
+        self.mjd = mjd
+    
+    def fit(self, data):
+
+        folded_data = data[np.argsort(new_mjd)]
+
+        sigma = np.std(folded_data)
+        N = len(folded_data)
+        m = np.mean(folded_data)
+        s = np.cumsum(folded_data-m)*1.0/(N*sigma)
+        R = np.max(s) - np.min(s)
+
+        return R
+
+
+class Psi_eta(Base):
+
+    def __init__(self):
+
+        self.category='timeSeries'
+
+    def fit(self,data):
+
+        # folded_mjd = np.sort(new_mjd)
+        folded_data = data[np.argsort(new_mjd)]
+
+        # w = 1.0 / np.power(folded_mjd[1:]-folded_mjd[:-1] ,2)
+        # w_mean = np.mean(w)
+
+        # N = len(folded_mjd)
+        # sigma2=np.var(folded_data)
+
+
+        # S1 = sum(w*(folded_data[1:]-folded_data[:-1])**2)
+        # S2 = sum(w)
+
+        # Psi_eta = w_mean * np.power(folded_mjd[N-1]-folded_mjd[0],2) * S1 / (sigma2 * S2 * N**2)
+
+
+        N = len(folded_data)
+        sigma2 = np.var(folded_data)
+        
+        Psi_eta = 1.0/((N-1)*sigma2) * np.sum(np.power(folded_data[1:] - folded_data[:-1] , 2))
+
+
+        return Psi_eta
+
 
 
 class CAR_sigma(Base):
@@ -877,8 +930,8 @@ class CAR_tmean(CAR_sigma):
     def fit(self, data):
 
         a = CAR_tmean()
-        #return np.mean(data) / a.getAtt()
         return np.mean(data) / a.getAtt()
+
 
 
 
