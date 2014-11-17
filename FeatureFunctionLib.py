@@ -7,6 +7,8 @@ import time
 from Base import Base
 
 from scipy.optimize import minimize
+from  statsmodels.tsa import stattools
+
 
 import lomb
 import math
@@ -74,35 +76,21 @@ class Meanvariance(Base):
 
     
 class Autocor(Base):
+    
     def __init__(self):
         self.category='timeSeries'
 
-    def autocorrelation(self, data, lag):
-        N=len(data)
-        std= np.std(data)
-        m = np.mean(data)
-        suma = 0
-
-        S = sum((data[:N-lag]-m)*(data[lag:N]-m))
-
-        ac = 1/((N-lag)* std**2) * S
-
-        return ac
         
     def fit(self, data):
-        threshold = math.exp(-1)
-        norm_value = self.autocorrelation(data, lag = 0 )
-        lag = 1
-        current_autocorr_value = 1
 
-        while current_autocorr_value > threshold:
-            current_autocorr_value = self.autocorrelation(data, lag=lag)/norm_value
-            lag = lag + 1
-        return lag
+        AC = stattools.acf(data, nlags=100)
+        k = next((index for index,value in enumerate(AC) if value < np.exp(-1)), None)
+
+        return k
 
 class SlottedA(Base):
 
-    def __init__(self, mjd):
+    def __init__(self, entry):
         """
         lc: MACHO lightcurve in a pandas DataFrame
         k: lag (default: 1)
@@ -111,7 +99,8 @@ class SlottedA(Base):
         self.category = 'timeSeries'
         SlottedA.SAC =[]
 
-        self.mjd = mjd
+        self.mjd = entry[0]
+        self.T = entry[1]
 
 
     def slotted_autocorrelation(self, data, mjd, T, K, second_round=False, K1=100):
@@ -164,9 +153,9 @@ class SlottedA(Base):
 
     def fit(self, data):
 
-        T=4
+        # T=4
         K1=100
-        [SAC, slots] = self.slotted_autocorrelation(data, self.mjd, T, K1)
+        [SAC, slots] = self.slotted_autocorrelation(data, self.mjd, self.T, K1)
         SlottedA.SAC = SAC
         SlottedA.slots = slots
 
@@ -175,12 +164,12 @@ class SlottedA(Base):
 
         if k == None:
             K2=200
-            [SAC, slots] = self.slotted_autocorrelation(data, self.mjd, T, K2, second_round=True, K1=K1)
+            [SAC, slots] = self.slotted_autocorrelation(data, self.mjd, self.T, K2, second_round=True, K1=K1)
             SAC2 = SAC[slots]
             k = next((index for index,value in enumerate(SAC2) if value < np.exp(-1)), None)
 
 
-        return slots[k]*T  
+        return slots[k]*self.T  
 
     def getAtt(self):
         return SlottedA.SAC, SlottedA.slots
