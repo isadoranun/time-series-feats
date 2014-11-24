@@ -12,12 +12,12 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-<script src="basejs/namespace.js"></script>
-<script src="basejs/events.js"></script>
-<script src="basejs/utils.js"></script>
-<script src="notebook.js"></script>
-<script src="nbtoc.js"></script>
-
+<script src="toc.js"></script>
+<script type="text/javascript">
+  $(function() {
+    table_of_contents();
+});
+</script>
 {% for css in resources.inlining.css -%}
     <style type="text/css">
     {{ css }}
@@ -120,10 +120,5 @@ div#notebook {
 {%- endblock body %}
 
 {% block footer %}
-<script type="text/javascript">
-  $(function() {
-    table_of_contents();
-});
-</script>
 </html>
 {% endblock footer %}
