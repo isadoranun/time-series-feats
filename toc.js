@@ -48,6 +48,7 @@ function table_of_contents(threshold) {
     var $e = $(e);
     var thetext=$e.text();
     var thelink = $e.find('a.anchor-link').attr("href");
+    thetext = thetext.substring(0,thetext.length - 1);
     var level = get_level($e);
     cells.push({"level":level,"thetext":thetext, "thelink":thelink})
     //console.log(thelink, thetext,level);
