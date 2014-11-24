@@ -40,7 +40,7 @@ def periodic_lc():
 
 @pytest.fixture
 def uniform_lc():
-	mjd=np.arange(1000000)
+	mjd_uniform=np.arange(1000000)
 	data_uniform=np.random.uniform(size=1000000)
 	return data_uniform, mjd_uniform
 
@@ -76,13 +76,13 @@ def uniform_lc():
 
 # 	assert(a.result(method='array') >= 0.043 and a.result(method='array') <= 0.046)
 
-def test_Beyond1StdL(white_noise):
+def test_Beyond1Std(white_noise):
 	# data, mjd, error, second_data, aligned_data, aligned_second_data, aligned_mjd = white_noise()
 
-	a = FeatureSpace(featureList=['Beyond1StdL'] , Beyond1StdL= white_noise[2])
+	a = FeatureSpace(featureList=['Beyond1Std'] , Beyond1Std= white_noise[2])
 	a=a.calculateFeature(white_noise[0])
 
-	assert(a.result(method='array') >= 0.31 and a.result(method='array') <= 0.33)
+	assert(a.result(method='array') >= 0.30 and a.result(method='array') <= 0.34)
 
 def test_Bmean(white_noise):
 
@@ -132,9 +132,9 @@ def test_FluxPercentile(white_noise):
 
 	assert(a.result(method='array')[0] >= 0.145 and a.result(method='array')[0] <= 0.160)
 	assert(a.result(method='array')[1] >= 0.260 and a.result(method='array')[1] <= 0.290)
-	assert(a.result(method='array')[2] >= 0.400 and a.result(method='array')[2] <= 0.420)
-	assert(a.result(method='array')[3] >= 0.560 and a.result(method='array')[3] <= 0.575)
-	assert(a.result(method='array')[4] >= 0.770 and a.result(method='array')[4] <= 0.790)
+	assert(a.result(method='array')[2] >= 0.390 and a.result(method='array')[2] <= 0.420)
+	assert(a.result(method='array')[3] >= 0.550 and a.result(method='array')[3] <= 0.580)
+	assert(a.result(method='array')[4] >= 0.760 and a.result(method='array')[4] <= 0.800)
 
 
 
@@ -158,17 +158,17 @@ def test_Meanvariance(uniform_lc):
 	# data, mjd, error, second_data, aligned_data, aligned_second_data, aligned_mjd = white_noise()
 
 	a = FeatureSpace(featureList=['Meanvariance'])
-	a=a.calculateFeature(white_noise[0])
+	a=a.calculateFeature(uniform_lc[0])
 
 	assert(a.result(method='array') >= 0.576 and a.result(method='array') <= 0.578)
 
-# def test_MedianAbsDev(white_noise):
-# 	# data, mjd, error, second_data, aligned_data, aligned_second_data, aligned_mjd = white_noise()
+def test_MedianAbsDev(white_noise):
+	# data, mjd, error, second_data, aligned_data, aligned_second_data, aligned_mjd = white_noise()
 
-# 	a = FeatureSpace(featureList=['MedianAbsDev'] , MaxSlope=mjd)
-# 	a=a.calculateFeature(white_noise[0])
+	a = FeatureSpace(featureList=['MedianAbsDev'])
+	a=a.calculateFeature(white_noise[0])
 
-# 	assert(a.result(method='array') >= 0.043 and a.result(method='array') <= 0.046)
+	assert(a.result(method='array') >= 0.670 and a.result(method='array') <= 0.680)
 
 # def test_MedianBRP(white_noise):
 # 	# data, mjd, error, second_data, aligned_data, aligned_second_data, aligned_mjd = white_noise()
