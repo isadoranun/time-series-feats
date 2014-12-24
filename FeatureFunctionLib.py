@@ -991,7 +991,7 @@ class CAR_tmean(Base):
         except:
             print "error: please run CAR_sigma first to generate values for CAR_tmean"
             
-class freq1_harmonics_amplitude_0(Base):
+class Freq1_harmonics_amplitude_0(Base):
     def __init__(self):
         self.Data = ['magnitude','time']
 
@@ -1008,26 +1008,26 @@ class freq1_harmonics_amplitude_0(Base):
         PH = []
         scaledPH = []
         
-        def model(x, a, b, c, freq):
-             return a*np.sin(2*np.pi*freq*x)+b*np.cos(2*np.pi*freq*x)+c
+        def model(x, a, b, c, Freq):
+             return a*np.sin(2*np.pi*Freq*x)+b*np.cos(2*np.pi*Freq*x)+c
         
         try:   
             for i in range(3):
                 
-                # fundamental_freq = period
+                # fundamental_Freq = period
 
                 wk1, wk2, nout, jmax, prob = lomb.fasper(time, magnitude, 6., 100.)
     
-                fundamental_freq = wk1[jmax]
+                fundamental_Freq = wk1[jmax]
                 
                 # fit to a_i sin(2pi f_i t) + b_i cos(2 pi f_i t) + b_i,o
                 
                 # a, b are the parameters we care about
                 # c is a constant offset
-                # f is the fundamental frequency
-                def yfunc(freq):
+                # f is the fundamental Frequency
+                def yfunc(Freq):
                     def func(x, a, b, c):
-                        return a*np.sin(2*np.pi*freq*x)+b*np.cos(2*np.pi*freq*x)+c
+                        return a*np.sin(2*np.pi*Freq*x)+b*np.cos(2*np.pi*Freq*x)+c
                     return func
                 
                 Atemp = []
@@ -1035,7 +1035,7 @@ class freq1_harmonics_amplitude_0(Base):
                 popts = []
                 
                 for j in range(4):
-                    popt, pcov = curve_fit(yfunc((j+1)*fundamental_freq), time, magnitude)
+                    popt, pcov = curve_fit(yfunc((j+1)*fundamental_Freq), time, magnitude)
                     Atemp.append(np.sqrt(popt[0]**2+popt[1]**2))
                     PHtemp.append(np.arctan(popt[1] / popt[0]))
                     popts.append(popt)
@@ -1044,7 +1044,7 @@ class freq1_harmonics_amplitude_0(Base):
                 PH.append(PHtemp)
                 
                 for j in range(4):
-                    magnitude = np.array(magnitude) - model(time, popts[j][0], popts[j][1], popts[j][2], (j+1)*fundamental_freq)
+                    magnitude = np.array(magnitude) - model(time, popts[j][0], popts[j][1], popts[j][2], (j+1)*fundamental_Freq)
             
             for ph in PH:
                 scaledPH.append(np.array(ph) - ph[0])
@@ -1055,7 +1055,7 @@ class freq1_harmonics_amplitude_0(Base):
 
 
 
-class freq1_harmonics_amplitude_1(Base):
+class Freq1_harmonics_amplitude_1(Base):
     def __init__(self):
         
         self.Data = ['magnitude','time']
@@ -1065,9 +1065,9 @@ class freq1_harmonics_amplitude_1(Base):
         try:
             return A[0][1]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq1_harmonics_amplitude_2(Base):
+class Freq1_harmonics_amplitude_2(Base):
     def __init__(self):
         
         self.Data = ['magnitude','time']
@@ -1077,9 +1077,9 @@ class freq1_harmonics_amplitude_2(Base):
         try:
             return A[0][2]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq1_harmonics_amplitude_3(Base):
+class Freq1_harmonics_amplitude_3(Base):
     def __init__(self):
         
         self.Data = ['magnitude','time']
@@ -1088,9 +1088,9 @@ class freq1_harmonics_amplitude_3(Base):
         try:
             return A[0][3]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq2_harmonics_amplitude_0(Base):
+class Freq2_harmonics_amplitude_0(Base):
     def __init__(self):
         
         self.Data = ['magnitude','time']
@@ -1099,9 +1099,9 @@ class freq2_harmonics_amplitude_0(Base):
         try:
             return A[1][0]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq2_harmonics_amplitude_1(Base):
+class Freq2_harmonics_amplitude_1(Base):
     def __init__(self):
          
          self.Data = ['magnitude','time']
@@ -1110,9 +1110,9 @@ class freq2_harmonics_amplitude_1(Base):
         try:
             return A[1][1]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq2_harmonics_amplitude_2(Base):
+class Freq2_harmonics_amplitude_2(Base):
     def __init__(self):
 
         self.Data = ['magnitude','time']
@@ -1121,9 +1121,9 @@ class freq2_harmonics_amplitude_2(Base):
         try:
             return A[1][2]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq2_harmonics_amplitude_3(Base):
+class Freq2_harmonics_amplitude_3(Base):
     def __init__(self):
 
         self.Data = ['magnitude','time']
@@ -1132,9 +1132,9 @@ class freq2_harmonics_amplitude_3(Base):
         try:
             return A[1][3]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq3_harmonics_amplitude_0(Base):
+class Freq3_harmonics_amplitude_0(Base):
     def __init__(self):
         
         self.Data = ['magnitude','time']
@@ -1143,9 +1143,9 @@ class freq3_harmonics_amplitude_0(Base):
         try:
             return A[2][0]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq3_harmonics_amplitude_1(Base):
+class Freq3_harmonics_amplitude_1(Base):
     def __init__(self):
         
         self.Data = ['magnitude','time']
@@ -1154,9 +1154,9 @@ class freq3_harmonics_amplitude_1(Base):
         try:
             return A[2][1]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq3_harmonics_amplitude_2(Base):
+class Freq3_harmonics_amplitude_2(Base):
     def __init__(self):
 
         self.Data = ['magnitude','time']
@@ -1165,9 +1165,9 @@ class freq3_harmonics_amplitude_2(Base):
         try:
             return A[2][2]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq3_harmonics_amplitude_3(Base):
+class Freq3_harmonics_amplitude_3(Base):
     def __init__(self):
 
         self.Data = ['magnitude','time']
@@ -1176,9 +1176,9 @@ class freq3_harmonics_amplitude_3(Base):
         try:
             return A[2][3]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq1_harmonics_rel_phase_0(Base):
+class Freq1_harmonics_rel_phase_0(Base):
     def __init__(self):
 
         self.Data = ['magnitude','time']
@@ -1187,9 +1187,9 @@ class freq1_harmonics_rel_phase_0(Base):
         try:
             return scaledPH[0][0]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq1_harmonics_rel_phase_1(Base):
+class Freq1_harmonics_rel_phase_1(Base):
     def __init__(self):
 
         self.Data = ['magnitude','time']
@@ -1198,9 +1198,9 @@ class freq1_harmonics_rel_phase_1(Base):
         try:
             return scaledPH[0][1]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq1_harmonics_rel_phase_2(Base):
+class Freq1_harmonics_rel_phase_2(Base):
     def __init__(self):
 
         self.Data = ['magnitude','time']
@@ -1209,9 +1209,9 @@ class freq1_harmonics_rel_phase_2(Base):
         try:
             return scaledPH[0][2]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq1_harmonics_rel_phase_3(Base):
+class Freq1_harmonics_rel_phase_3(Base):
     def __init__(self):
 
         self.Data = ['magnitude','time']
@@ -1220,9 +1220,9 @@ class freq1_harmonics_rel_phase_3(Base):
         try:
             return scaledPH[0][3]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq2_harmonics_rel_phase_0(Base):
+class Freq2_harmonics_rel_phase_0(Base):
     def __init__(self):
         self.category = 'timeSeries'
 
@@ -1232,9 +1232,9 @@ class freq2_harmonics_rel_phase_0(Base):
         try:
             return scaledPH[1][0]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq2_harmonics_rel_phase_1(Base):
+class Freq2_harmonics_rel_phase_1(Base):
     def __init__(self):
 
         self.Data = ['magnitude','time']
@@ -1243,9 +1243,9 @@ class freq2_harmonics_rel_phase_1(Base):
         try:
             return scaledPH[1][1]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq2_harmonics_rel_phase_2(Base):
+class Freq2_harmonics_rel_phase_2(Base):
     def __init__(self):
 
         self.Data = ['magnitude','time']
@@ -1254,9 +1254,9 @@ class freq2_harmonics_rel_phase_2(Base):
         try:
             return scaledPH[1][2]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq2_harmonics_rel_phase_3(Base):
+class Freq2_harmonics_rel_phase_3(Base):
     def __init__(self):
 
         self.Data = ['magnitude','time']
@@ -1265,9 +1265,9 @@ class freq2_harmonics_rel_phase_3(Base):
         try:
             return scaledPH[1][3]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq3_harmonics_rel_phase_0(Base):
+class Freq3_harmonics_rel_phase_0(Base):
     def __init__(self):
 
         self.Data = ['magnitude','time']
@@ -1276,9 +1276,9 @@ class freq3_harmonics_rel_phase_0(Base):
         try:
             return scaledPH[2][0]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq3_harmonics_rel_phase_1(Base):
+class Freq3_harmonics_rel_phase_1(Base):
     def __init__(self):
 
         self.Data = ['magnitude','time']
@@ -1287,9 +1287,9 @@ class freq3_harmonics_rel_phase_1(Base):
         try:
             return scaledPH[2][1]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq3_harmonics_rel_phase_2(Base):
+class Freq3_harmonics_rel_phase_2(Base):
     def __init__(self):
 
         self.Data = ['magnitude','time']
@@ -1298,9 +1298,9 @@ class freq3_harmonics_rel_phase_2(Base):
         try:
             return scaledPH[2][2]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
 
-class freq3_harmonics_rel_phase_3(Base):
+class Freq3_harmonics_rel_phase_3(Base):
     def __init__(self):
  
          self.Data = ['magnitude','time']
@@ -1309,4 +1309,4 @@ class freq3_harmonics_rel_phase_3(Base):
         try:
             return scaledPH[2][3]
         except:
-            print "error: please run freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+            print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
