@@ -15,7 +15,7 @@ warnings.filterwarnings('ignore')
 
 
 path = '/Volumes/LaCie/MACHO_LMC/F_1/'
-# path = '/Users/isadoranun/Dropbox/lightcurves/'
+#path = '/Users/isadoranun/Dropbox/lightcurves/'
 #path2 = '/Volumes/LaCie/MACHO_LMC/'
 #path = os.getcwd()
 
@@ -52,25 +52,28 @@ for j in os.listdir(path):
         				
 	    				lc_B = ReadLC_MACHO(content1)
 	    				lc_R = ReadLC_MACHO(content2)
-	    				[data, mjd, error] = lc_B.ReadLC()
-	    				[data2, mjd2, error2] = lc_R.ReadLC()
+	    				[mag, time, error] = lc_B.ReadLC()
+	    				[mag2, time2, error2] = lc_R.ReadLC()
 
-	    				preproccesed_data = Preprocess_LC(data, mjd, error)
-	    				[data, mjd, error] = preproccesed_data.Preprocess()
+	    				preproccesed_mag = Preprocess_LC(mag, time, error)
+	    				[mag, time, error] = preproccesed_mag.Preprocess()
 
-	    				preproccesed_data = Preprocess_LC(data2, mjd2, error2)
-	    				[second_data, mjd2, error2] = preproccesed_data.Preprocess()
+	    				preproccesed_mag = Preprocess_LC(mag2, time2, error2)
+	    				[mag2, time2, error2] = preproccesed_mag.Preprocess()
 
-	    				if len(data) != len(second_data):
-	    					[aligned_data, aligned_second_data, aligned_mjd] = Align_LC(mjd, mjd2, data, second_data, error, error2)
+	    				if len(mag) != len(mag2):
+	    					[aligned_mag, aligned_mag2, aligned_time] = Align_LC(time, time2, mag, mag2, error, error2)
 	    				else:
-	    					aligned_data = data
-	    					aligned_second_data = second_data
-	    					aligned_mjd = mjd
-	    				a = FeatureSpace(category='all',featureList=None, automean=[0,0], StetsonL=[aligned_second_data, aligned_data] , Color=second_data, Beyond1Std=error, StetsonJ=[aligned_second_data, aligned_data], MaxSlope=mjd, LinearTrend=mjd, Eta_color=[aligned_second_data, aligned_data, aligned_mjd], Eta_e=mjd, Q31_color=[aligned_second_data, aligned_data], PeriodLS=mjd, Psi_CS =mjd, CAR_sigma=[mjd, error], SlottedA_length = mjd)
+	    					aligned_mag = mag
+	    					aligned_mag2 = mag2
+	    					aligned_time = time
+
+	    				lc = np.array([mag,time,error,mag2,aligned_mag, aligned_mag2, aligned_time])
+
+	    				a = FeatureSpace(mag='all',featureList=None)
 
 	    				try:
-	    					a=a.calculateFeature(data)
+	    					a=a.calculateFeature(lc)
 	    					idx = [id[:-6]]
 	    					contador = contador + 1
 	    					check = True
@@ -78,10 +81,10 @@ for j in os.listdir(path):
 
 	    					if contador == 1:
 	    						print "contador1"
-	    						df = pd.DataFrame(a.result(method='array').reshape((1,len(a.result(method='array')))), columns = a.result(method='features'), index =[idx])
-	    						print "hice mi primer data frame"	
+	    						df = pd.magFrame(a.result(method='array').reshape((1,len(a.result(method='array')))), columns = a.result(method='features'), index =[idx])
+	    						print "hice mi primer mag frame"	
 	    					else:
-	    						df2 = pd.DataFrame(a.result(method='array').reshape((1,len(a.result(method='array')))), columns = a.result(method='features'), index =[idx])
+	    						df2 = pd.magFrame(a.result(method='array').reshape((1,len(a.result(method='array')))), columns = a.result(method='features'), index =[idx])
 	    						df = pd.concat([df, df2])
 
 	    				except:
@@ -104,7 +107,7 @@ for j in os.listdir(path):
 	# 	guardar = np.zeros(shape=(1,2))
 	# else:
 	# 	nombres = np.hstack(("MACHO_Id" , a.result(method='features')))
-	# 	my_data = np.genfromtxt(file_name, delimiter=',', dtype=None)
-	# 	guardar = np.vstack((nombres, my_data[1:], guardar[1:] ))
+	# 	my_mag = np.genfromtxt(file_name, delimiter=',', dtype=None)
+	# 	guardar = np.vstack((nombres, my_mag[1:], guardar[1:] ))
 	# 	np.savetxt(file_name, guardar, delimiter="," ,fmt="%s")
 	# 	guardar = np.zeros(shape=(1,2))

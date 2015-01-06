@@ -25,8 +25,8 @@ class Amplitude(Base):
         magnitude = data[0]
         N = len(magnitude)
         sorted_mag = np.sort(magnitude)
-        return (np.median(sorted_mag[-0.05 * N:]) -
-                np.median(sorted_mag[0:0.05 * N])) / 2
+        return (np.median(sorted_mag[-int(0.05 * N):]) -
+                np.median(sorted_mag[0:int(0.05 * N)])) / 2.0
 
 
 class Rcs(Base):
@@ -101,7 +101,7 @@ class Autocor_length(Base):
 
 class SlottedA_length(Base):
 
-    def __init__(self, T = 4):
+    def __init__(self, T = -99):
         """
         lc: MACHO lightcurve in a pandas DataFrame
         k: lag (default: 1)
@@ -165,6 +165,13 @@ class SlottedA_length(Base):
     def fit(self, data):
         magnitude = data[0]
         time = data[1]
+        N = len(time)
+
+        if self.T == -99:
+            deltaT = time[1:] - time[:-1]
+            sorted_deltaT = np.sort(deltaT)
+            self.T = sorted_deltaT[int(N * 0.05)+1]
+
 
         # T=4
         K1 = 100
