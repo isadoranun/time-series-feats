@@ -5,64 +5,86 @@ from import_lightcurve import ReadLC_MACHO
 from PreprocessLC import Preprocess_LC
 from alignLC import Align_LC
 import os.path
+import pandas as pd
 
-count = 0
+contador = 0
 folder = 1
+df = []
 #guardar = np.zeros(shape=(1,42))
-guardar = np.zeros(shape=(1,3))
 
-path = '/Users/isadoranun/Dropbox/lightcurves/'
+path = '/Users/isadoranun/Google Drive/lightcurves/'
 
-for j in os.listdir(path)[8:]:
+ex_ts = pd.read_csv('/Users/isadoranun/Documents/MACHO_ts2.csv',index_col=0) 
+ids = ex_ts.index.values
+
+
+for j in os.listdir(path)[2:]:
     
     if os.path.isdir(path + j):
 
-        count = count + 1
+        print j
 
         for i in os.listdir(path + j):
 
             if i.endswith("B.mjd") and not i.startswith('.') and os.path.isfile(path + j +'/'+ i[:-5] + 'R.mjd'):
 
-                lc_B = ReadLC_MACHO(path + j +'/'+ i[:])
-                lc_R = ReadLC_MACHO(path + j +'/'+ i[:-5] + 'R.mjd')
 
-        #Opening the light curve
+                a =[num for num, s in enumerate(ids) if i[3:-6] in s]
 
-                [data, mjd, error] = lc_B.ReadLC()
-                [data2, mjd2, error2] = lc_R.ReadLC()
+                print i[3:-5], a
 
-                preproccesed_data = Preprocess_LC(data, mjd, error)
-                [data, mjd, error] = preproccesed_data.Preprocess()
+                if a == []:
 
-                preproccesed_data = Preprocess_LC(data2, mjd2, error2)
-                [second_data, mjd2, error2] = preproccesed_data.Preprocess()
+                    print 'nuevo'
 
-                if len(data) != len(second_data):
-                    [aligned_data, aligned_second_data, aligned_mjd] = Align_LC(mjd, mjd2, data, second_data, error, error2)
+                    lc_B = ReadLC_MACHO(path + j +'/'+ i[:])
+                    lc_R = ReadLC_MACHO(path + j +'/'+ i[:-5] + 'R.mjd')
 
-             #   a = FeatureSpace(category='all',featureList=None, automean=[0,0], StetsonL=[aligned_second_data, aligned_data] ,  B_R=second_data, Beyond1Std=error, StetsonJ=[aligned_second_data, aligned_data], MaxSlope=mjd, LinearTrend=mjd, Eta_B_R=[aligned_second_data, aligned_data], Eta_e=mjd, Q31B_R=[aligned_second_data, aligned_data], PeriodLS=mjd, CAR_sigma=[mjd, error], SlottedA = mjd)
+            #Opening the light curve
 
-                a = FeatureSpace(featureList=['PeriodLS', 'Psi_CS','Psi_eta','Rcs'], Automean=[0,0], StetsonL=[aligned_second_data, aligned_data] ,  Color=second_data, Beyond1Std=error, StetsonJ=[aligned_second_data, aligned_data], MaxSlope=mjd, LinearTrend=mjd, Eta_color=[aligned_second_data, aligned_data, aligned_mjd], Eta_e=mjd, Q31_color=[aligned_second_data, aligned_data],  CAR_sigma=[mjd, error], SlottedA_length = mjd, PeriodLS=mjd, Psi_CS = mjd)
-                try:
-                    a=a.calculateFeature(data)
-                    guardar = np.vstack((guardar, np.hstack((i[3:-6] , a.result(method='array') , folder ))))
-                except:
-                    pass    
+                    [mag, time, error] = lc_B.ReadLC()
+                    [mag2, time2, error2] = lc_R.ReadLC()
+
+                    preproccesed_data = Preprocess_LC(mag, time, error)
+                    [mag, time, error] = preproccesed_data.Preprocess()
+
+                    preproccesed_data = Preprocess_LC(mag2, time2, error2)
+                    [mag2, time2, error2] = preproccesed_data.Preprocess()
+
+                    if len(mag) != len(mag2):
+                        [aligned_mag, aligned_mag2, aligned_time, aligned_error, aligned_error2] = Align_LC(time, time2, mag, mag2, error, error2)
+                    else:
+                        aligned_mag = mag
+                        aligned_mag2 = mag2
+                        aligned_time = time
+                        aligned_error = error
+                        aligned_error2 = error2
+
+                    lc = np.array([mag, time, error, mag2, aligned_mag, aligned_mag2, aligned_time, aligned_error, aligned_error2])
+
+                    a = FeatureSpace(Data='all', featureList=None)
+
+                    try:
+                        a=a.calculateFeature(lc)
+                        idx = i[3:-6]
+                        # print 'feat', (a.result(method='array')).shape
+                        contador = contador + 1
+
+
+                        if contador == 1:
+                            df = pd.DataFrame(np.asarray(a.result(method='array')).reshape((1,len(a.result(method='array')))), columns = a.result(method='features'), index=[idx])
+                        else:
+                            print contador
+                            df2 = pd.DataFrame(np.asarray(a.result(method='array')).reshape((1,len(a.result(method='array')))), columns = a.result(method='features'), index =[idx])
+                            df = pd.concat([df, df2])
+
+                    except:
+                        pass
+                
+                 #   a = FeatureSpace(category='all',featureList=None, automean=[0,0], StetsonL=[aligned_mag2, aligned_mag] ,  B_R=mag2, Beyond1Std=error, StetsonJ=[aligned_mag2, aligned_mag], MaxSlope=time, LinearTrend=time, Eta_B_R=[aligned_mag2, aligned_mag], Eta_e=time, Q31B_R=[aligned_mag2, aligned_mag], PeriodLS=time, CAR_sigma=[time, error], SlottedA = time)
+
+df.to_csv('/Users/isadoranun/Documents/MACHO_ts3.csv')     
                 
 
-        folder = folder + 1      
 
-        if count == 1:
-            nombres = np.hstack(("MACHO_Id" , a.result(method='features') , "Class"))   
-            guardar = np.vstack((nombres, guardar[1:]))
-            np.savetxt('test_real_Psi.csv', guardar, delimiter="," ,fmt="%s")
-            guardar = np.zeros(shape=(1,3))
-
-        else:
-            nombres = np.hstack(("MACHO_Id" , a.result(method='features') , "Class"))   
-            my_data = np.genfromtxt('test_real_Psi.csv', delimiter=',', dtype=None)
-            guardar = np.vstack((nombres, my_data[1:], guardar[1:] ))
-            np.savetxt('test_real_Psi.csv', guardar, delimiter="," ,fmt="%s")
-            guardar = np.zeros(shape=(1,3))
-
-        #B_R = second_data, Eta_B_R = second_data, Eta_e = mjd, MaxSlope = mjd, PeriodLS = mjd, Q31B_R = second_data, StetsonJ = second_data, StetsonL = second_data)
+        #B_R = mag2, Eta_B_R = mag2, Eta_e = time, MaxSlope = time, PeriodLS = time, Q31B_R = mag2, StetsonJ = mag2, StetsonL = mag2)

@@ -10,6 +10,8 @@ from scipy import stats
 from scipy.optimize import minimize
 from scipy.optimize import curve_fit
 from statsmodels.tsa import stattools
+from scipy import interpolate
+
 
 from Base import Base
 import lomb
@@ -46,13 +48,18 @@ class Rcs(Base):
 
 class StetsonK(Base):
     def __init__(self):
-        self.Data = ['magnitude']
+        self.Data = ['magnitude','error']
 
     def fit(self, data):
         magnitude = data[0]
+        error = data[2]
+
+        mean_mag = (np.sum(magnitude/(error*error)) / 
+                    np.sum(1.0 / (error * error)))
+
         N = len(magnitude)
         sigmap = (np.sqrt(N * 1.0 / (N - 1)) *
-                  (magnitude - np.mean(magnitude)) / np.std(magnitude))
+                  (magnitude - mean_mag) / error)
 
         K = (1 / np.sqrt(N * 1.0) *
              np.sum(np.abs(sigmap)) / np.sqrt(np.sum(sigmap ** 2)))
@@ -204,7 +211,7 @@ class StetsonK_AC(SlottedA_length):
 
     def __init__(self):
 
-        self.Data = ['magnitude','time']
+        self.Data = ['magnitude','time','error']
 
     def fit(self, data):
         
@@ -233,24 +240,31 @@ class StetsonK_AC(SlottedA_length):
 
 class StetsonL(Base):
     def __init__(self):
-        self.Data = ['magnitude','time','magnitude2']
+        self.Data = ['magnitude','time','error','magnitude2','error2']
 
     def fit(self, data):
 
         aligned_magnitude = data[4]
         aligned_magnitude2 = data[5]
+        aligned_error = data[7]
+        aligned_error2 = data[8]
 
         N = len(aligned_magnitude)
 
+        mean_mag = (np.sum(aligned_magnitude/(aligned_error*aligned_error)) / 
+                    np.sum(1.0 / (aligned_error * aligned_error)))
+        mean_mag2 = (np.sum(aligned_magnitude2/(aligned_error2*aligned_error2)) / 
+                     np.sum(1.0 / (aligned_error2 * aligned_error2)))
+        
             #sys.exit(1)
 
         sigmap = (np.sqrt(N * 1.0 / (N - 1)) *
-                 (aligned_magnitude[:N] - np.mean(aligned_magnitude)) /
-                  np.std(aligned_magnitude))
+                 (aligned_magnitude[:N] - mean_mag) /
+                  aligned_error)
 
         sigmaq = (np.sqrt(N * 1.0 / (N - 1)) *
-                 (aligned_magnitude2[:N] - np.mean(aligned_magnitude2)) /
-                  np.std(aligned_magnitude2))
+                 (aligned_magnitude2[:N] - mean_mag2) /
+                  aligned_error2)
         sigma_i = sigmap * sigmaq
 
         J = (1.0 / len(sigma_i) *
@@ -412,19 +426,28 @@ class StetsonJ(Base):
     """Stetson (1996) variability index, a robust standard deviation"""
 
     def __init__(self):
-        self.Data = ['magnitude','time','magnitude2']
+        self.Data = ['magnitude','time','error','magnitude2','error2']
 
     def fit(self, data):
         aligned_magnitude = data[4]
         aligned_magnitude2 = data[5]
+        aligned_error = data[7]
+        aligned_error2 = data[8]
         N = len(aligned_magnitude)
 
+        mean_mag = (np.sum(aligned_magnitude/(aligned_error*aligned_error)) / 
+                    np.sum(1.0 / (aligned_error * aligned_error)))
+
+        mean_mag2 = (np.sum(aligned_magnitude2 / (aligned_error2*aligned_error2)) / 
+                     np.sum(1.0 / (aligned_error2 * aligned_error2)))
+      
+
         sigmap = (np.sqrt(N * 1.0 / (N - 1)) *
-                 (aligned_magnitude[:N] - np.mean(aligned_magnitude)) /
-                  np.std(aligned_magnitude))
+                 (aligned_magnitude[:N] - mean_mag) /
+                  aligned_error)
         sigmaq = (np.sqrt(N * 1.0 / (N - 1)) *
-                 (aligned_magnitude2[:N] - np.mean(aligned_magnitude2)) /
-                  np.std(aligned_magnitude2))
+                 (aligned_magnitude2[:N] - mean_mag2) /
+                  aligned_error2)
         sigma_i = sigmap * sigmaq
 
         J = (1.0 / len(sigma_i) * np.sum(np.sign(sigma_i) *
@@ -517,10 +540,10 @@ class FluxPercentileRatioMid20(Base):
         sorted_data = np.sort(magnitude)
         lc_length = len(sorted_data)
 
-        F_60_index = int(0.60 * lc_length)
-        F_40_index = int(0.40 * lc_length)
-        F_5_index = int(0.05 * lc_length)
-        F_95_index = int(0.95 * lc_length)
+        F_60_index = math.ceil(0.60 * lc_length)
+        F_40_index = math.ceil(0.40 * lc_length)
+        F_5_index = math.ceil(0.05 * lc_length)
+        F_95_index = math.ceil(0.95 * lc_length)
 
         F_40_60 = sorted_data[F_60_index] - sorted_data[F_40_index]
         F_5_95 = sorted_data[F_95_index] - sorted_data[F_5_index]
@@ -539,10 +562,10 @@ class FluxPercentileRatioMid35(Base):
         sorted_data = np.sort(magnitude)
         lc_length = len(sorted_data)
 
-        F_325_index = int(0.325 * lc_length)
-        F_675_index = int(0.675 * lc_length)
-        F_5_index = int(0.05 * lc_length)
-        F_95_index = int(0.95 * lc_length)
+        F_325_index = math.ceil(0.325 * lc_length)
+        F_675_index = math.ceil(0.675 * lc_length)
+        F_5_index = math.ceil(0.05 * lc_length)
+        F_95_index = math.ceil(0.95 * lc_length)
 
         F_325_675 = sorted_data[F_675_index] - sorted_data[F_325_index]
         F_5_95 = sorted_data[F_95_index] - sorted_data[F_5_index]
@@ -561,10 +584,10 @@ class FluxPercentileRatioMid50(Base):
         sorted_data = np.sort(magnitude)
         lc_length = len(sorted_data)
 
-        F_25_index = int(0.25 * lc_length)
-        F_75_index = int(0.75 * lc_length)
-        F_5_index = int(0.05 * lc_length)
-        F_95_index = int(0.95 * lc_length)
+        F_25_index = math.ceil(0.25 * lc_length)
+        F_75_index = math.ceil(0.75 * lc_length)
+        F_5_index = math.ceil(0.05 * lc_length)
+        F_95_index = math.ceil(0.95 * lc_length)
 
         F_25_75 = sorted_data[F_75_index] - sorted_data[F_25_index]
         F_5_95 = sorted_data[F_95_index] - sorted_data[F_5_index]
@@ -583,10 +606,10 @@ class FluxPercentileRatioMid65(Base):
         sorted_data = np.sort(magnitude)
         lc_length = len(sorted_data)
 
-        F_175_index = int(0.175 * lc_length)
-        F_825_index = int(0.825 * lc_length)
-        F_5_index = int(0.05 * lc_length)
-        F_95_index = int(0.95 * lc_length)
+        F_175_index = math.ceil(0.175 * lc_length)
+        F_825_index = math.ceil(0.825 * lc_length)
+        F_5_index = math.ceil(0.05 * lc_length)
+        F_95_index = math.ceil(0.95 * lc_length)
 
         F_175_825 = sorted_data[F_825_index] - sorted_data[F_175_index]
         F_5_95 = sorted_data[F_95_index] - sorted_data[F_5_index]
@@ -605,10 +628,10 @@ class FluxPercentileRatioMid80(Base):
         sorted_data = np.sort(magnitude)
         lc_length = len(sorted_data)
 
-        F_10_index = int(0.10 * lc_length)
-        F_90_index = int(0.90 * lc_length)
-        F_5_index = int(0.05 * lc_length)
-        F_95_index = int(0.95 * lc_length)
+        F_10_index = math.ceil(0.10 * lc_length)
+        F_90_index = math.ceil(0.90 * lc_length)
+        F_5_index = math.ceil(0.05 * lc_length)
+        F_95_index = math.ceil(0.95 * lc_length)
 
         F_10_90 = sorted_data[F_90_index] - sorted_data[F_10_index]
         F_5_95 = sorted_data[F_95_index] - sorted_data[F_5_index]
@@ -628,8 +651,8 @@ class PercentDifferenceFluxPercentile(Base):
 
         sorted_data = np.sort(magnitude)
         lc_length = len(sorted_data)
-        F_5_index = int(0.05 * lc_length)
-        F_95_index = int(0.95 * lc_length)
+        F_5_index = math.ceil(0.05 * lc_length)
+        F_95_index = math.ceil(0.95 * lc_length)
         F_5_95 = sorted_data[F_95_index] - sorted_data[F_5_index]
 
         percent_difference = F_5_95 / median_data
@@ -709,7 +732,7 @@ class Eta_e(Base):
 
         magnitude = data[0]
         time = data[1]
-        w = 1.0 / np.power(time[1:] - time[:-1], 2)
+        w = 1.0 / np.power(np.subtract(time[1:], time[:-1]), 2)
         w_mean = np.mean(w)
 
         N = len(time)
@@ -789,19 +812,20 @@ class PeriodLS(Base):
         magnitude = data[0]
         time = data[1]
 
-        global new_time
-        global prob
-        global period
-
-        fx, fy, nout, jmax, prob = lomb.fasper(time, magnitude, self.ofac, 100.)
+        fx, fy, nout, jmax, PeriodLS.prob = lomb.fasper(time, magnitude, self.ofac, 100.)
         period = fx[jmax]
         T = 1.0 / period
-        new_time = np.mod(time, 2 * T) / (2 * T)
-
+        PeriodLS.new_time = np.mod(time, 2 * T) / (2 * T)
         return T
 
+    def getProb(self):
+        return PeriodLS.prob
 
-class Period_fit(Base):
+    def getNewTime(self):
+        return PeriodLS.new_time
+
+
+class Period_fit(PeriodLS):
 
     def __init__(self):
 
@@ -810,12 +834,15 @@ class Period_fit(Base):
     def fit(self, data):
 
         try:
+            a = PeriodLS()
+            # [autocor_vector, slots] = a.getAtt()
+            prob = a.getProb()
             return prob
         except:    
             print "error: please run PeriodLS first to generate values for Period_fit"
 
 
-class Psi_CS(Base):
+class Psi_CS(PeriodLS):
 
     def __init__(self):
 
@@ -824,6 +851,9 @@ class Psi_CS(Base):
     def fit(self, data):
         
         try:
+            a = PeriodLS()
+            # [autocor_vector, slots] = a.getAtt()
+            new_time = a.getNewTime()
             magnitude = data[0]
             time = data[1]
             folded_data = magnitude[np.argsort(new_time)]
@@ -838,7 +868,7 @@ class Psi_CS(Base):
             print "error: please run PeriodLS first to generate values for Psi_CS"
 
 
-class Psi_eta(Base):
+class Psi_eta(PeriodLS):
 
     def __init__(self):
 
@@ -848,6 +878,8 @@ class Psi_eta(Base):
 
         # folded_time = np.sort(new_time)
         try:
+            a = PeriodLS()
+            new_time = a.getNewTime()
             magnitude = data[0]
             folded_data = magnitude[np.argsort(new_time)]
 
@@ -1007,6 +1039,30 @@ class CAR_mean(Base):
             return np.mean(magnitude) / tau
         except:
             print "error: please run CAR_sigma first to generate values for CAR_mean"
+
+# class Structure_function(Base):
+    
+#     def __init__(self, Nsf = 1000, Np = 1000):
+
+#         self.Data = ['magnitude','time']
+
+#         self.Nsf = Nsf
+#         self.Np = Np
+
+#     def fit(self,data):
+
+#         magnitude = data[0]
+#         time = data[1]
+
+#         sf = np.zeros(self.Nsf)
+#         f = interpolate.interp1d(time, magnitude)
+#         time_int = np.linspace(np.min(time), np.max(time), self.Np)
+#         mag_int = f(time_int) 
+
+#         for tau in np.arange(1, self.Nsf):
+#             sf[tau-1]=np.mean(np.power( mag_int[0:self.Np-tau] - mag_int[tau:self.Np] , 2))
+
+#         return sf
             
 class Freq1_harmonics_amplitude_0(Base):
     def __init__(self):
@@ -1322,3 +1378,4 @@ class Freq3_harmonics_rel_phase_3(Base):
             return scaledPH[2][3]
         except:
             print "error: please run Freq1_harmonics_amplitude_0 first to generate values for all harmonics"
+

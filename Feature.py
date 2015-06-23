@@ -142,7 +142,7 @@ class FeatureSpace:
     def result(self, method='array'):
         if method == 'array':
             if self.sort == True:
-                return [np.asarray(self.__result)[i] for i in self.idx] 
+                return [self.__result[i] for i in self.idx] 
             else:
                 return np.asarray(self.__result)
         elif method == 'dict':
@@ -157,3 +157,4 @@ class FeatureSpace:
                 return self.featureList
         else:
             return self.__result
+
